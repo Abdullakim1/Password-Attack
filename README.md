@@ -29,18 +29,13 @@ Demonstrates various password cracking techniques:
 # Database configuration in both files:
 host: localhost
 user: luxury_user
-password: luxury123
+password: 
 database: security
 ```
 
 2. Run the login system:
 ```bash
-python login_system.py
-```
-
-3. Run the password analyzer:
-```bash
-python password_analyzer.py
+python -m password_analyzer
 ```
 
 ## Security Features
