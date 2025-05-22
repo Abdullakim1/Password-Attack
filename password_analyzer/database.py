@@ -8,10 +8,8 @@ import mysql.connector
 from colorama import Fore, Style
 
 class DatabaseManager:
-    """Manages database connections and operations."""
     
     def __init__(self):
-        """Initialize the database manager with connection configuration."""
         self.db_config = {
             'host': 'localhost',
             'user': 'luxury_user',
@@ -20,12 +18,7 @@ class DatabaseManager:
         }
     
     def get_connection(self):
-        """
-        Create and return a database connection.
         
-        Returns:
-            mysql.connector.connection: Database connection or None if error
-        """
         try:
             return mysql.connector.connect(**self.db_config)
         except mysql.connector.Error as err:
@@ -33,12 +26,7 @@ class DatabaseManager:
             return None
     
     def get_users(self):
-        """
-        Get list of all usernames from the database.
         
-        Returns:
-            list: List of usernames or empty list if error
-        """
         conn = self.get_connection()
         if not conn:
             return []
@@ -53,17 +41,7 @@ class DatabaseManager:
         return users
     
     def get_user_hash(self, username, use_salt=False):
-        """
-        Get the hash for a specific user.
         
-        Args:
-            username: Username to get hash for
-            use_salt: Whether to get salted hash or unsalted hash
-            
-        Returns:
-            tuple: (hash, salt) if use_salt is True, (hash, None) otherwise
-                  Returns (None, None) if user not found or error
-        """
         conn = self.get_connection()
         if not conn:
             return None, None

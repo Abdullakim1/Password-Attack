@@ -10,15 +10,9 @@ from colorama import Fore, Style
 from ..base import PasswordAttack
 
 class MaskAttack(PasswordAttack):
-    """Implements mask-based password cracking."""
     
     def __init__(self, hash_verifier):
-        """
-        Initialize the mask attack.
         
-        Args:
-            hash_verifier: Object that verifies if a password matches a hash
-        """
         super().__init__(hash_verifier)
         self.lowercase = string.ascii_lowercase
         self.uppercase = string.ascii_uppercase
@@ -26,16 +20,7 @@ class MaskAttack(PasswordAttack):
         self.symbols = string.punctuation
     
     def execute(self, target_hash, **kwargs):
-        """
-        Execute the mask attack.
         
-        Args:
-            target_hash: The hash to crack
-            **kwargs: Additional parameters (not used)
-            
-        Returns:
-            tuple: (success, password, attempts, elapsed_time)
-        """
         print(f"\n{Fore.YELLOW}Starting mask attack...{Style.RESET_ALL}")
 
         masks = [
@@ -98,15 +83,7 @@ class MaskAttack(PasswordAttack):
         return self.print_failure_stats(attempts, start_time)
     
     def _generate_from_mask(self, mask):
-        """
-        Generate passwords from a mask pattern.
         
-        Args:
-            mask: The mask pattern (e.g., '?l?l?l?d?d?d')
-            
-        Returns:
-            list: List of all generated passwords
-        """
         charset_map = {
             '?l': self.lowercase,
             '?u': self.uppercase,

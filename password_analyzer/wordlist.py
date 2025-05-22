@@ -8,27 +8,16 @@ import requests
 from colorama import Fore, Style
 
 class WordlistManager:
-    """Manages password wordlists including downloading and loading."""
     
     def __init__(self, wordlists_dir='wordlists'):
-        """
-        Initialize the wordlist manager.
         
-        Args:
-            wordlists_dir: Directory to store wordlists
-        """
         self.wordlists_dir = wordlists_dir
         
         if not os.path.exists(self.wordlists_dir):
             os.makedirs(self.wordlists_dir)
     
     def download_wordlists(self):
-        """
-        Download common password lists from the internet.
         
-        Returns:
-            bool: True if at least one wordlist was downloaded successfully
-        """
         print(f"\n{Fore.YELLOW}Downloading password lists...{Style.RESET_ALL}")
         
         wordlists = {
@@ -56,12 +45,7 @@ class WordlistManager:
         return success
     
     def load_wordlists(self):
-        """
-        Load all downloaded password lists.
         
-        Returns:
-            list: List of unique passwords from all wordlists
-        """
         passwords = set()
         
         for filename in os.listdir(self.wordlists_dir):
@@ -76,34 +60,19 @@ class WordlistManager:
         return list(passwords)
     
     def get_base_words(self):
-        """
-        Get a list of common base words for hybrid attacks.
-        
-        Returns:
-            list: List of common base words
-        """
+       
         return [
             "pass", "pwd", "admin", "user", "login", "test", "demo", 
             "guest", "root", "dev", "system", "web", "app", "api"
         ]
     
     def generate_username_variations(self, username):
-        """
-        Generate common variations of the username.
         
-        Args:
-            username: Username to generate variations for
-            
-        Returns:
-            list: List of username variations
-        """
         variations = [username.lower(), username]
         
-        # Add common variations
         if len(username) > 3:
             variations.extend([username[:4], username[:3]])
             
-            # Leetspeak variations
             leetspeak = {
                 'a': '4', 'e': '3', 'i': '1', 'o': '0', 's': '5', 't': '7'
             }

@@ -11,7 +11,6 @@ from .login.login_system import LoginSystem
 init()  
 
 def password_cracker_menu():
-    """Run the password cracker menu."""
     controller = PasswordCrackingController()
     
     print(f"{Fore.BLUE}=== Real Password Cracker ==={Style.RESET_ALL}")

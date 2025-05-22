@@ -12,10 +12,8 @@ from colorama import Fore, Style
 from ..database import DatabaseManager
 
 class LoginSystem:
-    """Manages user authentication and account operations."""
     
     def __init__(self):
-        """Initialize the login system with database connection."""
         self.db_manager = DatabaseManager()
         if not self.test_connection():
             print(f"{Fore.RED}Error: Could not connect to MySQL database!{Style.RESET_ALL}")
@@ -31,7 +29,6 @@ class LoginSystem:
         self.init_database()
 
     def test_connection(self):
-        """Test database connectivity."""
         try:
             conn = self.db_manager.get_connection()
             conn.close()
@@ -40,7 +37,6 @@ class LoginSystem:
             return False
 
     def init_database(self):
-        """Initialize database and create tables if not exists."""
         try:
             conn = self.db_manager.get_connection()
             cursor = conn.cursor()
@@ -64,38 +60,16 @@ class LoginSystem:
             sys.exit(1)
             
     def generate_salt(self):
-        """
-        Generate a random salt for password hashing.
         
-        Returns:
-            str: A random hexadecimal salt
-        """
         return secrets.token_hex(16)  # 16 bytes = 128 bits
         
     def hash_with_salt(self, password, salt):
-        """
-        Create a salted SHA-256 hash of the password.
         
-        Args:
-            password: The password to hash
-            salt: The salt to use
-            
-        Returns:
-            str: The salted hash
-        """
         salted = password + salt
         return hashlib.sha256(salted.encode()).hexdigest()
 
     def execute_db_operation(self, operation_func):
-        """
-        Execute a database operation with error handling.
         
-        Args:
-            operation_func: Function that takes a connection and performs operations
-            
-        Returns:
-            Any: Result of the operation or None if error
-        """
         try:
             conn = self.db_manager.get_connection()
             result = operation_func(conn)
@@ -106,15 +80,7 @@ class LoginSystem:
             return None
 
     def load_credentials(self, username):
-        """
-        Load user credentials from database.
         
-        Args:
-            username: Username to load credentials for
-            
-        Returns:
-            dict: User credentials or None if not found
-        """
         def operation(conn):
             cursor = conn.cursor(dictionary=True)
             cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
@@ -124,20 +90,7 @@ class LoginSystem:
         return self.execute_db_operation(operation)
 
     def save_credentials(self, username, unsalted_hash, salted_hash, salt, failed_attempts=0, locked=False):
-        """
-        Save or update user credentials in database.
         
-        Args:
-            username: Username to save
-            unsalted_hash: Unsalted password hash
-            salted_hash: Salted password hash
-            salt: Salt used for hashing
-            failed_attempts: Number of failed login attempts
-            locked: Whether the account is locked
-            
-        Returns:
-            bool: True if successful, False otherwise
-        """
         def operation(conn):
             cursor = conn.cursor()
             cursor.execute('''
@@ -156,17 +109,7 @@ class LoginSystem:
         return self.execute_db_operation(operation)
         
     def update_login_attempt(self, username, failed_attempts, locked):
-        """
-        Update failed attempts and lock status.
         
-        Args:
-            username: Username to update
-            failed_attempts: Number of failed login attempts
-            locked: Whether the account is locked
-            
-        Returns:
-            bool: True if successful, False otherwise
-        """
         def operation(conn):
             cursor = conn.cursor()
             cursor.execute('''
@@ -180,24 +123,11 @@ class LoginSystem:
         return self.execute_db_operation(operation)
 
     def hash_password(self, password):
-        """
-        Create SHA-256 hash of a password.
         
-        Args:
-            password: Password to hash
-            
-        Returns:
-            str: SHA-256 hash of the password
-        """
         return hashlib.sha256(password.encode()).hexdigest()
 
     def register(self):
-        """
-        Register a new user.
         
-        Returns:
-            bool: True if registration successful, False otherwise
-        """
         print(f"\n{Fore.CYAN}=== User Registration ==={Style.RESET_ALL}")
         username = input("Enter username: ").strip()
         
@@ -221,12 +151,7 @@ class LoginSystem:
         return True
 
     def login(self):
-        """
-        Attempt to log in a user.
         
-        Returns:
-            bool: True if login successful, False otherwise
-        """
         print(f"\n{Fore.CYAN}=== User Login ==={Style.RESET_ALL}")
         username = input("Enter username: ").strip()
         password = getpass("Enter password: ")
@@ -257,15 +182,7 @@ class LoginSystem:
             return False
 
     def reset_account(self, username):
-        """
-        Reset account lock and failed attempts.
         
-        Args:
-            username: Username to reset
-            
-        Returns:
-            bool: True if reset successful, False otherwise
-        """
         if self.load_credentials(username):
             self.update_login_attempt(username, 0, False)
             print(f"{Fore.GREEN}Account '{username}' has been reset.{Style.RESET_ALL}")
@@ -276,7 +193,6 @@ class LoginSystem:
 
 
 def main():
-    """Main entry point for the login system."""
     login_system = LoginSystem()
     
     while True:

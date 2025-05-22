@@ -8,28 +8,13 @@ from colorama import Fore, Style
 from ..base import PasswordAttack
 
 class RuleBasedAttack(PasswordAttack):
-    """Implements rule-based password cracking using word transformations."""
     
     def __init__(self, hash_verifier):
-        """
-        Initialize the rule-based attack.
         
-        Args:
-            hash_verifier: Object that verifies if a password matches a hash
-        """
         super().__init__(hash_verifier)
     
     def execute(self, target_hash, **kwargs):
-        """
-        Execute the rule-based attack.
         
-        Args:
-            target_hash: The hash to crack
-            **kwargs: Additional parameters (not used)
-            
-        Returns:
-            tuple: (success, password, attempts, elapsed_time)
-        """
         print(f"\n{Fore.YELLOW}Starting rule-based attack (word transformations)...{Style.RESET_ALL}")
     
         base_words = [

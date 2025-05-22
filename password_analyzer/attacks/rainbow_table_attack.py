@@ -11,28 +11,13 @@ from colorama import Fore, Style
 from ..base import PasswordAttack
 
 class RainbowTableAttack(PasswordAttack):
-    """Implements rainbow table-based password cracking."""
     
     def __init__(self, hash_verifier):
-        """
-        Initialize the rainbow table attack.
         
-        Args:
-            hash_verifier: Object that verifies if a password matches a hash
-        """
         super().__init__(hash_verifier)
     
     def execute(self, target_hash, **kwargs):
-        """
-        Execute the rainbow table attack.
         
-        Args:
-            target_hash: The hash to crack
-            **kwargs: Additional parameters (not used)
-            
-        Returns:
-            tuple: (success, password, attempts, elapsed_time)
-        """
         print(f"\n{Fore.CYAN}Starting rainbow table attack...{Style.RESET_ALL}")
         print("This will use pre-computed hashes to crack the password")
         
@@ -91,15 +76,7 @@ class RainbowTableAttack(PasswordAttack):
         return False
     
     def generate_rainbow_table(self, max_length=3):
-        """
-        Generate a rainbow table of password hashes.
         
-        Args:
-            max_length: Maximum password length to include
-            
-        Returns:
-            dict: Dictionary mapping hashes to passwords
-        """
         rainbow_table = {}
         chars = string.ascii_lowercase + string.digits + string.ascii_uppercase + string.punctuation
         total = 0
