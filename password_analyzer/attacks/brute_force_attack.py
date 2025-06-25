@@ -10,9 +10,15 @@ from colorama import Fore, Style
 from ..base import PasswordAttack
 
 class BruteForceAttack(PasswordAttack):
+    """Implements brute force password cracking."""
     
     def __init__(self, hash_verifier):
+        """
+        Initialize the brute force attack.
         
+        Args:
+            hash_verifier: Object that verifies if a password matches a hash
+        """
         super().__init__(hash_verifier)
         self.lowercase = string.ascii_lowercase
         self.uppercase = string.ascii_uppercase
@@ -20,7 +26,16 @@ class BruteForceAttack(PasswordAttack):
         self.symbols = string.punctuation
     
     def execute(self, target_hash, **kwargs):
+        """
+        Execute the brute force attack.
         
+        Args:
+            target_hash: The hash to crack
+            **kwargs: Additional parameters (not used)
+            
+        Returns:
+            tuple: (success, password, attempts, elapsed_time)
+        """
         print(f"\n{Fore.YELLOW}Starting brute force attack...{Style.RESET_ALL}")
         print("This will try every possible combination of characters")
         

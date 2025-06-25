@@ -36,7 +36,9 @@ def password_cracker_menu():
                 
             print(f"\nTarget: {username}")
             print(f"Hash: {target_hash}")
+
             
+
             if choice == '1':
                 controller.run_dictionary_attack(target_hash)
             elif choice == '2':
