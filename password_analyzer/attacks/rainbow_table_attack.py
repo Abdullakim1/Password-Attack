@@ -11,18 +11,11 @@ from colorama import Fore, Style
 from ..base import PasswordAttack
 
 class RainbowTableAttack(PasswordAttack):
-    """Implements rainbow table-based password cracking."""
     
     def __init__(self, hash_verifier):
-        """
-        Initialize the rainbow table attack.
-        """
         super().__init__(hash_verifier)
     
     def execute(self, target_hash, **kwargs):
-        """
-        Execute the rainbow table attack.
-        """
         print(f"\n{Fore.CYAN}Starting rainbow table attack...{Style.RESET_ALL}")
         print("This will use pre-computed hashes to crack the password")
         
@@ -30,7 +23,6 @@ class RainbowTableAttack(PasswordAttack):
         current_salt = self.hash_verifier.current_salt
         
         if using_salt:
-            print(f"\n{Fore.YELLOW}Note: This hash is salted. Let's see why rainbow tables don't work...{Style.RESET_ALL}")
             print(f"{Fore.YELLOW}Salt used: {current_salt}{Style.RESET_ALL}")
             
         start_time = time.time()
@@ -67,28 +59,19 @@ class RainbowTableAttack(PasswordAttack):
         return False
 
     def print_unsalted_success_stats(self, password, time_taken):
-        """ Custom print for unsalted to highlight the speed. """
         print(f"\n\n{Fore.GREEN}Password found instantly in rainbow table!{Style.RESET_ALL}")
         print(f"{Fore.GREEN}Password: {password}{Style.RESET_ALL}")
         print(f"{Fore.GREEN}Time for lookup: {time_taken:.6f} seconds{Style.RESET_ALL}")
-        print(f"\n{Fore.YELLOW}Notice how fast this was - just a simple lookup!{Style.RESET_ALL}")
 
     def print_salted_success_stats(self, password, attempts, start_time):
-        """ Custom print function to explain why the salted attack was different. """
         end_time = time.time()
         print(f"\n\n{Fore.GREEN}Password found!{Style.RESET_ALL}")
         print(f"{Fore.GREEN}Password: {password}{Style.RESET_ALL}")
         print(f"{Fore.GREEN}Hashes computed: {attempts:,}{Style.RESET_ALL}")
         print(f"{Fore.GREEN}Time taken: {end_time:.1f} seconds{Style.RESET_ALL}")
-        print(f"\n{Fore.YELLOW}Why was this attack different?{Style.RESET_ALL}")
-        print(f"{Fore.YELLOW}1. The rainbow table was useless - the salted hash wasn't in it.{Style.RESET_ALL}")
         print(f"{Fore.YELLOW}2. We had to compute a new hash for each password + salt combination.{Style.RESET_ALL}")
-        print(f"{Fore.YELLOW}3. This is a practical demonstration of why salting defeats rainbow table attacks!{Style.RESET_ALL}")
 
     def generate_rainbow_table(self, max_length=4):
-        """
-        Generate a rainbow table using only lowercase letters for faster demonstration.
-        """
         rainbow_table = {}
         chars = string.ascii_lowercase
         total = 0

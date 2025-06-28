@@ -49,7 +49,6 @@ class PasswordCrackingController:
         self.hash_verifier.using_salt = use_salt
         self.hash_verifier.current_salt = salt
 
-        # Store for later use (to check if salted)
         self.last_target_salted = use_salt
 
         return username, hash_value

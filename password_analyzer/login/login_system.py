@@ -61,7 +61,7 @@ class LoginSystem:
             
     def generate_salt(self):
         
-        return secrets.token_hex(16)  # 16 bytes = 128 bits
+        return secrets.token_hex(16)  
         
     def hash_with_salt(self, password, salt):
         
@@ -192,30 +192,3 @@ class LoginSystem:
             return False
 
 
-def main():
-    login_system = LoginSystem()
-    
-    while True:
-        print(f"\n{Fore.CYAN}=== Security Demo System ==={Style.RESET_ALL}")
-        print("1. Register")
-        print("2. Login")
-        print("3. Reset Account")
-        print("4. Exit")
-        
-        choice = input("\nEnter your choice (1-4): ")
-        
-        if choice == '1':
-            login_system.register()
-        elif choice == '2':
-            login_system.login()
-        elif choice == '3':
-            username = input("Enter username to reset: ")
-            login_system.reset_account(username)
-        elif choice == '4':
-            break
-        else:
-            print(f"{Fore.RED}Invalid choice!{Style.RESET_ALL}")
-
-
-if __name__ == "__main__":
-    main()

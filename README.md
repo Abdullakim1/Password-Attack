@@ -29,11 +29,15 @@ Demonstrates various password cracking techniques:
 # Database configuration in both files:
 host: localhost
 user: luxury_user
-password: 
+password: luxury123
 database: security
 ```
+2. Command to see the database:
+```bash
+mysql -u luxury_user -p
+``` 
 
-2. Run the login system:
+3. Run the login system:
 ```bash
 python -m password_analyzer
 ```

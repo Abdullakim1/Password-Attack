@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Password Analyzer - Main Entry Point
 This module serves as the entry point for the password analyzer application.
@@ -56,7 +55,6 @@ def password_cracker_menu():
             return
 
 def login_system_menu():
-    """Run the login system menu."""
     login_system = LoginSystem()
     
     while True:
@@ -81,7 +79,6 @@ def login_system_menu():
             print(f"{Fore.RED}Invalid choice!{Style.RESET_ALL}")
 
 def main():
-    """Main entry point for the password analyzer application."""
     while True:
         print(f"\n{Fore.BLUE}=== Password Security System ==={Style.RESET_ALL}")
         print("1. Password Cracker")

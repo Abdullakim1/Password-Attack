@@ -9,29 +9,14 @@ from ..base import PasswordAttack
 from ..wordlist import WordlistManager
 
 class DictionaryAttack(PasswordAttack):
-    """Implements dictionary-based password cracking."""
     
     def __init__(self, hash_verifier):
-        """
-        Initialize the dictionary attack.
         
-        Args:
-            hash_verifier: Object that verifies if a password matches a hash
-        """
         super().__init__(hash_verifier)
         self.wordlist_manager = WordlistManager()
     
     def execute(self, target_hash, **kwargs):
-        """
-        Execute the dictionary attack.
         
-        Args:
-            target_hash: The hash to crack
-            **kwargs: Additional parameters (not used)
-            
-        Returns:
-            tuple: (success, password, attempts, elapsed_time)
-        """
         print(f"\n{Fore.YELLOW}Starting enhanced dictionary attack...{Style.RESET_ALL}")
         
         self.wordlist_manager.download_wordlists()

@@ -8,7 +8,6 @@ from abc import ABC, abstractmethod
 from colorama import Fore, Style
 
 class PasswordAttack(ABC):
-    """Abstract base class for all password cracking attacks."""
     
     def __init__(self, hash_verifier):
         self.hash_verifier = hash_verifier
