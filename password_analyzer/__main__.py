@@ -23,7 +23,11 @@ def password_cracker_menu():
         print("4. Mask Attack (uses password structure patterns)")
         print("5. Rule-Based Attack (applies transformation rules)")
         print("6. Rainbow Table Attack (pre-computed hash tables)")
-        print("7. Return to Main Menu")
+        print("7. Analyze Password Strength (check before cracking)")
+        print("8. View Previous Results")
+        print("9. Run Performance Benchmark")
+        print("10. Start Web Interface")
+        print("11. Return to Main Menu")
         
         choice = input(f"{Fore.YELLOW}\nChoose attack method (1-7): {Style.RESET_ALL}")
         
@@ -99,3 +103,34 @@ def main():
 
 if __name__ == "__main__":
     main()
+elif choice == '7':
+                # Password strength analysis
+                password = input(f"{Fore.YELLOW}Enter password to analyze: {Style.RESET_ALL}")
+                if password:
+                    analysis = controller.analyze_password_strength(password)
+                    controller.strength_analyzer.print_analysis(analysis)
+                    
+            elif choice == '8':
+                # View previous results
+                results = controller.get_previous_results()
+                controller.reporter.display_results_summary(results)
+                
+            elif choice == '9':
+                # Run benchmark
+                print(f"{Fore.YELLOW}Running performance benchmark...{Style.RESET_ALL}")
+                results = controller.run_benchmark()
+                report = controller.benchmark.generate_benchmark_report(results)
+                filename = controller.reporter.save_benchmark_results(report)
+                print(f"{Fore.GREEN}Benchmark completed and saved to {filename}{Style.RESET_ALL}")
+                
+            elif choice == '10':
+                # Start web interface
+                print(f"{Fore.CYAN}Starting web interface...{Style.RESET_ALL}")
+                print(f"Access the web interface at: http://localhost:5000")
+                from .web_interface import run_web_interface
+                run_web_interface()
+                
+            elif choice == '11':
+                break
+        else:
+            print(f"{Fore.RED}Invalid choice. Please try again.{Style.RESET_ALL}")

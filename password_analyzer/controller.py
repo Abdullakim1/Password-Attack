@@ -12,12 +12,18 @@ from .attacks.hybrid_attack import HybridAttack
 from .attacks.mask_attack import MaskAttack
 from .attacks.rule_based_attack import RuleBasedAttack
 from .attacks.rainbow_table_attack import RainbowTableAttack
+from .strength_analyzer import PasswordStrengthAnalyzer
+from .reporting import ResultsReporter
+from .benchmark import PerformanceBenchmark
 
 class PasswordCrackingController:
     
     def __init__(self):
         self.db_manager = DatabaseManager()
         self.hash_verifier = HashVerifier()
+        self.strength_analyzer = PasswordStrengthAnalyzer()
+        self.reporter = ResultsReporter()
+        self.benchmark = PerformanceBenchmark()
     
     def load_target(self):
         
@@ -82,3 +88,23 @@ class PasswordCrackingController:
         
         attack = RainbowTableAttack(self.hash_verifier)
         return attack.execute(target_hash)
+    
+    def analyze_password_strength(self, password):
+        """Analyze password strength before cracking"""
+        return self.strength_analyzer.analyze_password(password)
+    
+    def save_attack_result(self, attack_type, username, target_hash, success, password, attempts, elapsed, use_salt=False):
+        """Save attack results to file"""
+        rate = attempts / elapsed if elapsed > 0 else 0
+        result = self.reporter.create_attack_result(
+            attack_type, username, target_hash, success, password, attempts, elapsed, rate, use_salt
+        )
+        return self.reporter.save_result(result)
+    
+    def run_benchmark(self):
+        """Run performance benchmark"""
+        return self.benchmark.run_comprehensive_benchmark()
+    
+    def get_previous_results(self):
+        """Get previous analysis results"""
+        return self.reporter.load_previous_results()

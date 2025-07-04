@@ -1,0 +1,62 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        <h2 class="text-center mb-4">Password Analysis Results</h2>
+        
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Analysis Summary</h5>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Password Length:</strong></div>
+                    <div class="col-sm-8">{{ analysis.length }} characters</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Entropy:</strong></div>
+                    <div class="col-sm-8">{{ "%.2f"|format(analysis.entropy) }} bits</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Estimated Crack Time:</strong></div>
+                    <div class="col-sm-8">{{ analysis.crack_time_estimate }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Strength Rating:</strong></div>
+                    <div class="col-sm-8">
+                        <span class="badge 
+                        {% if analysis.strength_rating == 'Very Weak' %}bg-danger
+                        {% elif analysis.strength_rating == 'Weak' %}bg-warning
+                        {% elif analysis.strength_rating == 'Fair' %}bg-info
+                        {% elif analysis.strength_rating == 'Strong' %}bg-success
+                        {% else %}bg-primary
+                        {% endif %}">
+                            {{ analysis.strength_rating }}
+                        </span>
+                    </div>
+                </div>
+                
+                {% if analysis.patterns %}
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Detected Patterns:</strong></div>
+                    <div class="col-sm-8">
+                        {% for pattern in analysis.patterns %}
+                        <span class="pattern-item">{{ pattern }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="mt-4 text-center">
+            <a href="{{ url_for('analyze_password') }}" class="btn btn-primary">Analyze Another Password</a>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
