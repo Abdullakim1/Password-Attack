@@ -171,42 +171,58 @@ class PerformanceBenchmark:
         
         if not results:
             print(f"{Fore.RED}No benchmark results to report{Style.RESET_ALL}")
-            return
+            return {
+                'timestamp': time.time(),
+                'results': [],
+                'summary': {},
+                'error': 'No results to report'
+            }
         
-        # Group results by test type
-        grouped = {}
-        for result in results:
-            test_type = result['test_type']
-            if test_type not in grouped:
-                grouped[test_type] = []
-            grouped[test_type].append(result)
-        
-        # Generate report for each test type
-        for test_type, test_results in grouped.items():
-            print(f"\n{Fore.YELLOW}{test_type.upper()} RESULTS:{Style.RESET_ALL}")
+        try:
+            # Group results by test type
+            grouped = {}
+            for result in results:
+                test_type = result.get('test_type', 'unknown')
+                if test_type not in grouped:
+                    grouped[test_type] = []
+                grouped[test_type].append(result)
             
-            if test_type == 'hash_verification':
-                for result in test_results:
-                    print(f"  Rate: {result['rate_per_second']:,.0f} hashes/second")
+            # Generate report for each test type
+            for test_type, test_results in grouped.items():
+                print(f"\n{Fore.YELLOW}{test_type.upper()} RESULTS:{Style.RESET_ALL}")
+                
+                if test_type == 'hash_verification':
+                    for result in test_results:
+                        rate = result.get('rate_per_second', 0)
+                        print(f"  Rate: {rate:,.0f} hashes/second")
+                
+                else:
+                    rates = [r.get('rate_per_second', 0) for r in test_results if r.get('rate_per_second', 0) > 0]
+                    times = [r.get('elapsed_time', 0) for r in test_results if 'elapsed_time' in r]
+                    successes = [r for r in test_results if r.get('success', False)]
+                    
+                    print(f"  Tests run: {len(test_results)}")
+                    print(f"  Successful cracks: {len(successes)}")
+                    
+                    if rates:
+                        print(f"  Average rate: {statistics.mean(rates):,.0f} attempts/second")
+                        print(f"  Max rate: {max(rates):,.0f} attempts/second")
+                        print(f"  Min rate: {min(rates):,.0f} attempts/second")
+                    
+                    if times:
+                        print(f"  Average time: {statistics.mean(times):.2f} seconds")
             
-            else:
-                rates = [r['rate_per_second'] for r in test_results if r['rate_per_second'] > 0]
-                times = [r['elapsed_time'] for r in test_results]
-                successes = [r for r in test_results if r['success']]
-                
-                print(f"  Tests run: {len(test_results)}")
-                print(f"  Successful cracks: {len(successes)}")
-                
-                if rates:
-                    print(f"  Average rate: {statistics.mean(rates):,.0f} attempts/second")
-                    print(f"  Max rate: {max(rates):,.0f} attempts/second")
-                    print(f"  Min rate: {min(rates):,.0f} attempts/second")
-                
-                if times:
-                    print(f"  Average time: {statistics.mean(times):.2f} seconds")
-        
-        return {
-            'timestamp': time.time(),
-            'results': results,
-            'summary': grouped
-        }
+            return {
+                'timestamp': time.time(),
+                'results': results,
+                'summary': grouped
+            }
+            
+        except Exception as e:
+            print(f"{Fore.RED}Error generating report: {e}{Style.RESET_ALL}")
+            return {
+                'timestamp': time.time(),
+                'results': results,
+                'summary': {},
+                'error': str(e)
+            }

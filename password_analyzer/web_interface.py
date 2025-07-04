@@ -127,33 +127,74 @@ def run_benchmark():
     """Run performance benchmark"""
     try:
         results = benchmark.run_comprehensive_benchmark()
+        if not results:
+            return jsonify({'error': 'No benchmark results generated'}), 500
+            
         report = benchmark.generate_benchmark_report(results)
+        if not report:
+            return jsonify({'error': 'Failed to generate benchmark report'}), 500
         
         # Save benchmark results
         filename = reporter.save_benchmark_results(report)
+        if not filename:
+            return jsonify({'error': 'Failed to save benchmark results'}), 500
+        
+        # Format results for frontend display
+        formatted_results = {}
+        for result in results:
+            test_type = result.get('test_type', 'unknown')
+            if test_type not in formatted_results:
+                formatted_results[test_type] = {
+                    'tests': [],
+                    'success_rate': 0,
+                    'avg_time': 0,
+                    'avg_attempts': 0
+                }
+            formatted_results[test_type]['tests'].append(result)
+        
+        # Calculate averages
+        for test_type, data in formatted_results.items():
+            tests = data['tests']
+            if tests:
+                successful = [t for t in tests if t.get('success', False)]
+                data['success_rate'] = len(successful) / len(tests) if tests else 0
+                data['avg_time'] = sum(t.get('elapsed_time', 0) for t in tests) / len(tests)
+                data['avg_attempts'] = sum(t.get('attempts', 0) for t in tests) / len(tests)
         
         return jsonify({
             'success': True,
-            'results': results,
+            'results': formatted_results,
+            'raw_results': results,
             'report': report,
             'saved_to': filename
         })
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        app.logger.error(f"Benchmark error: {str(e)}")
+        return jsonify({'error': f'Benchmark failed: {str(e)}'}), 500
 
 @app.route('/results')
 def results_page():
     """Results and reports page"""
     previous_results = reporter.load_previous_results()
-    # Extract the actual data from the results
-    results_data = []
+    # Filter only attack results for the results table
+    attack_results = []
+    benchmark_files = []
+    
     for result in previous_results:
         data = result['data']
-        # Add filename to the data for download links
-        data['filename'] = result['filename']
-        results_data.append(data)
-    return render_template('results.html', results=results_data)
+        filename = result['filename']
+        
+        # Check if this is a benchmark file
+        if filename.startswith('benchmark_'):
+            benchmark_files.append({'filename': filename, 'data': data})
+        # Check if this is an attack result with required fields
+        elif isinstance(data, dict) and 'attack_type' in data:
+            # Add filename to the data for download links
+            data['filename'] = filename
+            attack_results.append(data)
+    
+    return render_template('results.html', results=attack_results, benchmarks=benchmark_files)
 
 @app.route('/download/<filename>')
 def download_result(filename):

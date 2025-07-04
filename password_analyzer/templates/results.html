@@ -67,11 +67,90 @@
                 </div>
                 {% else %}
                 <div class="alert alert-info">
-                    No previous results found. Run some attacks or benchmarks to see results here.
+                    No previous attack results found. Run some attacks to see results here.
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+{% if benchmarks %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Benchmark Results</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Test Type</th>
+                                <th>Total Tests</th>
+                                <th>Success Rate</th>
+                                <th>Avg Rate</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for benchmark in benchmarks %}
+                            <tr>
+                                <td>
+                                    {% if benchmark.data.timestamp %}
+                                        {{ moment(benchmark.data.timestamp).format('YYYY-MM-DD HH:mm:ss') if moment else benchmark.data.timestamp }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge bg-secondary">Benchmark</span></td>
+                                <td>{{ benchmark.data.results|length if benchmark.data.results else 0 }}</td>
+                                <td>
+                                    {% if benchmark.data.results %}
+                                        {% set successful = benchmark.data.results | selectattr('success', 'defined') | selectattr('success') | list %}
+                                        {% set total = benchmark.data.results | selectattr('success', 'defined') | list %}
+                                        {% if total %}
+                                            {{ "%.1f"|format((successful|length / total|length) * 100) }}%
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if benchmark.data.results %}
+                                        {% set rates = benchmark.data.results | selectattr('rate_per_second', 'defined') | map(attribute='rate_per_second') | list %}
+                                        {% if rates %}
+                                            {{ "%.0f"|format(rates | sum / rates | length) }} /sec
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('download_result', filename=benchmark.filename) }}" class="btn btn-sm btn-outline-primary">Download</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if not results and not benchmarks %}
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info">
+            No previous results found. Run some attacks or benchmarks to see results here.
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
