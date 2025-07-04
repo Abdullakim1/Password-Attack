@@ -146,16 +146,24 @@ def run_benchmark():
 def results_page():
     """Results and reports page"""
     previous_results = reporter.load_previous_results()
-    return render_template('results.html', results=previous_results)
+    # Extract the actual data from the results
+    results_data = []
+    for result in previous_results:
+        data = result['data']
+        # Add filename to the data for download links
+        data['filename'] = result['filename']
+        results_data.append(data)
+    return render_template('results.html', results=results_data)
 
 @app.route('/download/<filename>')
 def download_result(filename):
     """Download result file"""
-    filepath = os.path.join(reporter.results_dir, filename)
+    # Use absolute path to ensure correct file location
+    filepath = os.path.abspath(os.path.join(reporter.results_dir, filename))
     if os.path.exists(filepath):
         return send_file(filepath, as_attachment=True)
     else:
-        return "File not found", 404
+        return f"File not found: {filename}", 404
 
 def run_web_interface():
     """Run the web interface"""

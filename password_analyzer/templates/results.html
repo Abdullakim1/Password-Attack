@@ -46,15 +46,15 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if result.get('success') and result.get('password') %}
-                                        <code>{{ result.get('password') }}</code>
+                                    {% if result.get('success') and result.get('password_found') %}
+                                        <code>{{ result.get('password_found') }}</code>
                                     {% else %}
                                         <span class="text-muted">-</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ "{:,}".format(result.get('attempts', 0)) }}</td>
-                                <td>{{ "%.2f"|format(result.get('elapsed_time', 0)) }}s</td>
-                                <td>{{ "%.0f"|format(result.get('attempts_per_second', 0)) }}</td>
+                                <td>{{ "%.2f"|format(result.get('elapsed_time_seconds', 0)) }}s</td>
+                                <td>{{ "%.0f"|format(result.get('rate_per_second', 0)) }}</td>
                                 <td>
                                     {% if result.get('filename') %}
                                         <a href="{{ url_for('download_result', filename=result.get('filename')) }}" class="btn btn-sm btn-outline-primary">Download</a>
