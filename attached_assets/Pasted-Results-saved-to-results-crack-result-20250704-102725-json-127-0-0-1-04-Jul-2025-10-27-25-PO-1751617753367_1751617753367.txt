@@ -1,0 +1,45 @@
+Results saved to: results/crack_result_20250704_102725.json
+127.0.0.1 - - [04/Jul/2025 10:27:25] "POST /crack/execute HTTP/1.1" 200 -
+127.0.0.1 - - [04/Jul/2025 10:27:40] "GET /crack HTTP/1.1" 200 -
+127.0.0.1 - - [04/Jul/2025 10:27:42] "GET /benchmark HTTP/1.1" 200 -
+[2025-07-04 10:27:44,655] ERROR in app: Exception on /results [GET]
+Traceback (most recent call last):
+  File "/data/Valuer/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/Valuer/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/Valuer/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/Valuer/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/System security/Password-Attack/password_analyzer/web_interface.py", line 149, in results_page
+    return render_template('results.html', results=previous_results)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/Valuer/venv/lib/python3.12/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/Valuer/venv/lib/python3.12/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/Valuer/venv/lib/python3.12/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/data/Valuer/venv/lib/python3.12/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/data/System security/Password-Attack/password_analyzer/templates/results.html", line 2, in top-level template code
+    {% extends "base.html" %}
+  File "/data/System security/Password-Attack/password_analyzer/templates/base.html", line 50, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/System security/Password-Attack/password_analyzer/templates/results.html", line 44, in block 'content'
+    <td>{{ "%.2f"|format(result.elapsed_time) }}s</td>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/Valuer/venv/lib/python3.12/site-packages/jinja2/filters.py", line 1042, in do_format
+    return soft_str(value) % (kwargs or args)
+           ~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+jinja2.exceptions.UndefinedError: 'dict object' has no attribute 'elapsed_time'
+127.0.0.1 - - [04/Jul/2025 10:27:44] "GET /results HTTP/1.1" 500 -
+[2025-07-04 10:27:49,815] ERROR in app: Exception on /results [GET]
