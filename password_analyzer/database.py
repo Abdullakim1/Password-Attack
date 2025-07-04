@@ -17,6 +17,87 @@ class DatabaseManager:
             'database': 'security'
         }
     
+    def insert_crack_result(self, result_data):
+        conn = self.get_connection()
+        if not conn:
+            return False
+
+        cursor = conn.cursor()
+        try:
+            sql = """
+            INSERT INTO crack_results (
+                timestamp, attack_type, username, target_hash, success,
+                password_found, attempts, elapsed_time_seconds, rate_per_second, salt_used
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            values = (
+                result_data['timestamp'],
+                result_data['attack_type'],
+                result_data['username'],
+                result_data['target_hash'],
+                result_data['success'],
+                result_data['password_found'],
+                result_data['attempts'],
+                result_data['elapsed_time_seconds'],
+                result_data['rate_per_second'],
+                result_data['salt_used']
+            )
+            cursor.execute(sql, values)
+            conn.commit()
+            print(f"{Fore.GREEN}Crack result for {result_data['username']} inserted successfully.{Style.RESET_ALL}")
+            return True
+        except mysql.connector.Error as err:
+            print(f"{Fore.RED}Error inserting crack result: {err}{Style.RESET_ALL}")
+            conn.rollback()
+            return False
+        finally:
+            cursor.close()
+            conn.close()
+
+    def insert_benchmark_data(self, benchmark_data):
+        conn = self.get_connection()
+        if not conn:
+            return False
+
+        cursor = conn.cursor()
+        try:
+            # Insert into benchmarks table
+            sql_benchmark = "INSERT INTO benchmarks (timestamp) VALUES (FROM_UNIXTIME(%s))"
+            cursor.execute(sql_benchmark, (benchmark_data['timestamp'],))
+            benchmark_id = cursor.lastrowid
+
+            # Insert into benchmark_results table
+            sql_results = """
+            INSERT INTO benchmark_results (
+                benchmark_id, test_type, iterations, elapsed_time, rate_per_second,
+                target_password, success, found_password, attempts
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            for result in benchmark_data['results']:
+                values = (
+                    benchmark_id,
+                    result['test_type'],
+                    result.get('iterations'),
+                    result['elapsed_time'],
+                    result['rate_per_second'],
+                    result.get('target_password'),
+                    result.get('success'),
+                    result.get('found_password'),
+                    result.get('attempts')
+                )
+                cursor.execute(sql_results, values)
+
+            conn.commit()
+            print(f"{Fore.GREEN}Benchmark data inserted successfully with ID: {benchmark_id}.{Style.RESET_ALL}")
+            return True
+        except mysql.connector.Error as err:
+            print(f"{Fore.RED}Error inserting benchmark data: {err}{Style.RESET_ALL}")
+            conn.rollback()
+            return False
+        finally:
+            cursor.close()
+            conn.close()
+    
     def get_connection(self):
         
         try:
@@ -25,6 +106,91 @@ class DatabaseManager:
             print(f"{Fore.RED}Database connection error: {err}{Style.RESET_ALL}")
             return None
     
+    # ---------------- Retrieval helpers ----------------
+    def fetch_crack_results(self):
+        """Return a list of dicts for all crack_results rows ordered by newest first."""
+        conn = self.get_connection()
+        if not conn:
+            return []
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT * FROM crack_results ORDER BY timestamp DESC")
+            rows = cursor.fetchall()
+            return rows if rows else []
+        except mysql.connector.Error as err:
+            print(f"{Fore.RED}Error fetching crack results: {err}{Style.RESET_ALL}")
+            return []
+        finally:
+            cursor.close()
+            conn.close()
+
+    def fetch_crack_result_by_id(self, result_id):
+        conn = self.get_connection()
+        if not conn:
+            return None
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT * FROM crack_results WHERE id=%s", (result_id,))
+            return cursor.fetchone()
+        except mysql.connector.Error as err:
+            print(f"{Fore.RED}Error fetching crack result: {err}{Style.RESET_ALL}")
+            return None
+        finally:
+            cursor.close()
+            conn.close()
+
+    def fetch_benchmark_report_by_id(self, bench_id):
+        conn = self.get_connection()
+        if not conn:
+            return None
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT timestamp FROM benchmarks WHERE id=%s", (bench_id,))
+            bench = cursor.fetchone()
+            if not bench:
+                return None
+            cursor.execute("SELECT * FROM benchmark_results WHERE benchmark_id=%s", (bench_id,))
+            results = cursor.fetchall()
+            return {
+                'timestamp': bench['timestamp'].timestamp() if hasattr(bench['timestamp'], 'timestamp') else bench['timestamp'],
+                'results': results,
+            }
+        except mysql.connector.Error as err:
+            print(f"{Fore.RED}Error fetching benchmark report: {err}{Style.RESET_ALL}")
+            return None
+        finally:
+            cursor.close()
+            conn.close()
+
+    def fetch_benchmark_reports(self):
+        """Reconstruct benchmark reports similar to the JSON structure used previously."""
+        conn = self.get_connection()
+        if not conn:
+            return []
+        cursor = conn.cursor(dictionary=True)
+        try:
+            # Get benchmarks
+            cursor.execute("SELECT id, timestamp FROM benchmarks ORDER BY timestamp DESC")
+            benchmarks = cursor.fetchall()
+            reports = []
+            for bench in benchmarks:
+                bench_id = bench['id']
+                # fetch benchmark results
+                cursor.execute("SELECT * FROM benchmark_results WHERE benchmark_id=%s", (bench_id,))
+                results = cursor.fetchall()
+                report = {
+                    'timestamp': bench['timestamp'].timestamp() if hasattr(bench['timestamp'], 'timestamp') else bench['timestamp'],
+                    'results': results,
+                }
+                reports.append({'filename': f'database_benchmark_{bench_id}', 'data': report})
+            return reports
+        except mysql.connector.Error as err:
+            print(f"{Fore.RED}Error fetching benchmark reports: {err}{Style.RESET_ALL}")
+            return []
+        finally:
+            cursor.close()
+            conn.close()
+
     def get_users(self):
         
         conn = self.get_connection()

@@ -9,33 +9,34 @@ import csv
 import datetime
 import os
 from colorama import Fore, Style
+from .database import DatabaseManager
 
 class ResultsReporter:
     
     def __init__(self):
+        # Directory kept for backward compatibility (may be unused)
         self.results_dir = "results"
         self.ensure_results_dir()
+        # Initialize database manager for storing results
+        self.db_manager = DatabaseManager()
     
     def ensure_results_dir(self):
         """Create results directory if it doesn't exist"""
         if not os.path.exists(self.results_dir):
             os.makedirs(self.results_dir)
     
-    def save_result(self, result_data, format_type="json"):
-        """Save cracking result to file"""
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        
-        if format_type.lower() == "json":
-            filename = f"{self.results_dir}/crack_result_{timestamp}.json"
-            self.save_to_json(result_data, filename)
-        elif format_type.lower() == "csv":
-            filename = f"{self.results_dir}/crack_result_{timestamp}.csv"
-            self.save_to_csv(result_data, filename)
+    def save_result(self, result_data, format_type: str = "json"):
+        """Persist cracking result to the database instead of a local file.
+        The format_type argument is now ignored but kept for backward
+        compatibility with existing calls.
+        Returns True on success, False otherwise.
+        """
+        success = self.db_manager.insert_crack_result(result_data)
+        if success:
+            print(f"{Fore.GREEN}Result stored in database successfully{Style.RESET_ALL}")
         else:
-            print(f"{Fore.RED}Unsupported format: {format_type}{Style.RESET_ALL}")
-            return None
-        
-        return filename
+            print(f"{Fore.RED}Failed to store result in database{Style.RESET_ALL}")
+        return success
     
     def save_to_json(self, data, filename):
         """Save data to JSON file"""
@@ -79,37 +80,39 @@ class ResultsReporter:
         }
     
     def save_benchmark_results(self, benchmark_data):
-        """Save benchmark results to file"""
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{self.results_dir}/benchmark_{timestamp}.json"
-        
-        try:
-            with open(filename, 'w', encoding='utf-8') as f:
-                json.dump(benchmark_data, f, indent=2, ensure_ascii=False)
-            print(f"{Fore.GREEN}Benchmark results saved to: {filename}{Style.RESET_ALL}")
-            return filename
-        except Exception as e:
-            print(f"{Fore.RED}Error saving benchmark: {e}{Style.RESET_ALL}")
+        """Persist benchmark results to the database instead of a local file.
+        Returns the string "database" on success so that existing print
+        statements continue to work without modification.
+        """
+        success = self.db_manager.insert_benchmark_data(benchmark_data)
+        if success:
+            print(f"{Fore.GREEN}Benchmark results stored in database successfully{Style.RESET_ALL}")
+            return "database"
+        else:
+            print(f"{Fore.RED}Failed to store benchmark results in database{Style.RESET_ALL}")
             return None
     
     def load_previous_results(self):
         """Load and display previous results"""
-        if not os.path.exists(self.results_dir):
-            print(f"{Fore.YELLOW}No previous results found{Style.RESET_ALL}")
-            return []
-        
-        results = []
-        for filename in os.listdir(self.results_dir):
-            if filename.endswith('.json'):
-                filepath = os.path.join(self.results_dir, filename)
-                try:
-                    with open(filepath, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-                        results.append({'filename': filename, 'data': data})
-                except Exception as e:
-                    print(f"{Fore.RED}Error loading {filename}: {e}{Style.RESET_ALL}")
-        
-        return results
+        # Prefer database records; fall back to legacy JSON files
+        db_results = self.db_manager.fetch_crack_results()
+        db_benchmarks = self.db_manager.fetch_benchmark_reports()
+        combined = []
+        for row in db_results:
+            combined.append({'filename': f'database_crack_{row.get("id")}', 'data': row})
+        combined.extend(db_benchmarks)
+        # If no database entries, still check legacy directory
+        if not combined and os.path.exists(self.results_dir):
+            for filename in os.listdir(self.results_dir):
+                if filename.endswith('.json'):
+                    filepath = os.path.join(self.results_dir, filename)
+                    try:
+                        with open(filepath, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                            combined.append({'filename': filename, 'data': data})
+                    except Exception as e:
+                        print(f"{Fore.RED}Error loading {filename}: {e}{Style.RESET_ALL}")
+        return combined
     
     def display_results_summary(self, results):
         """Display summary of previous results"""

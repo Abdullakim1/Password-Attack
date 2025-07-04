@@ -186,7 +186,7 @@ def results_page():
         filename = result['filename']
         
         # Check if this is a benchmark file
-        if filename.startswith('benchmark_'):
+        if filename.startswith(('benchmark_', 'database_benchmark_')):
             benchmark_files.append({'filename': filename, 'data': data})
         # Check if this is an attack result with required fields
         elif isinstance(data, dict) and 'attack_type' in data:
@@ -200,11 +200,30 @@ def results_page():
 def download_result(filename):
     """Download result file"""
     # Use absolute path to ensure correct file location
+    # If filename corresponds to database entries, generate JSON on the fly
+    if filename.startswith('database_crack_'):
+        result_id = filename.split('_')[-1]
+        row = controller.db_manager.fetch_crack_result_by_id(result_id)
+        if not row:
+            return f"Database record not found", 404
+        temp_path = f"/tmp/{filename}.json"
+        with open(temp_path, 'w') as f:
+            json.dump(row, f, indent=2, default=str)
+        return send_file(temp_path, as_attachment=True)
+    if filename.startswith('database_benchmark_'):
+        bench_id = filename.split('_')[-1]
+        report = controller.db_manager.fetch_benchmark_report_by_id(bench_id)
+        if not report:
+            return f"Database record not found", 404
+        temp_path = f"/tmp/{filename}.json"
+        with open(temp_path, 'w') as f:
+            json.dump(report, f, indent=2, default=str)
+        return send_file(temp_path, as_attachment=True)
+    # Legacy file path
     filepath = os.path.abspath(os.path.join(reporter.results_dir, filename))
     if os.path.exists(filepath):
         return send_file(filepath, as_attachment=True)
-    else:
-        return f"File not found: {filename}", 404
+    return f"File not found: {filename}", 404
 
 def run_web_interface():
     """Run the web interface"""
