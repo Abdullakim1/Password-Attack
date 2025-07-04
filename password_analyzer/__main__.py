@@ -111,23 +111,12 @@ def login_system_menu():
             print(f"{Fore.RED}Invalid choice!{Style.RESET_ALL}")
 
 def main():
-    while True:
-        print(f"\n{Fore.BLUE}=== Password Security System ==={Style.RESET_ALL}")
-        print("1. Password Cracker")
-        print("2. Login System")
-        print("3. Exit")
-        
-        choice = input(f"{Fore.YELLOW}\nChoose system (1-3): {Style.RESET_ALL}")
-        
-        if choice == '1':
-            password_cracker_menu()
-        elif choice == '2':
-            login_system_menu()
-        elif choice == '3':
-            print(f"{Fore.GREEN}Goodbye!{Style.RESET_ALL}")
-            break
-        else:
-            print(f"{Fore.RED}Invalid choice!{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}Starting Password Security Analyzer Web Interface...{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}Access the web interface at: http://localhost:5000{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}All features are available through the web interface!{Style.RESET_ALL}")
+    
+    from .web_interface import run_web_interface
+    run_web_interface()
 
 if __name__ == "__main__":
     main()

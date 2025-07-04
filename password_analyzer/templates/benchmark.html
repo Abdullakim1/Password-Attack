@@ -1,0 +1,96 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>Performance Benchmark</h2>
+        <p class="text-muted">Test and compare the performance of different password cracking methods.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Run Benchmark</h5>
+                <p>This will test all attack methods against various password complexities.</p>
+                <button id="runBenchmark" class="btn btn-info">Start Benchmark</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">What Gets Tested</h5>
+                <ul>
+                    <li>Dictionary attacks on common passwords</li>
+                    <li>Brute force on short passwords</li>
+                    <li>Hybrid attacks with patterns</li>
+                    <li>Performance metrics and comparisons</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4" id="benchmarkResults" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Benchmark Results</h5>
+                <div id="resultsContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('runBenchmark').addEventListener('click', function() {
+    const button = this;
+    const resultsSection = document.getElementById('benchmarkResults');
+    const resultsContent = document.getElementById('resultsContent');
+    
+    button.disabled = true;
+    button.textContent = 'Running Benchmark...';
+    resultsContent.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
+    resultsSection.style.display = 'block';
+    
+    fetch('/benchmark/run', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            resultsContent.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+        } else {
+            let html = '<div class="alert alert-success">Benchmark completed successfully!</div>';
+            html += `<p><strong>Results saved to:</strong> ${data.saved_to}</p>`;
+            html += '<h6>Performance Summary:</h6>';
+            html += '<div class="table-responsive"><table class="table table-striped">';
+            html += '<thead><tr><th>Attack Method</th><th>Success Rate</th><th>Avg Time</th><th>Avg Attempts</th></tr></thead><tbody>';
+            
+            for (const [method, stats] of Object.entries(data.results)) {
+                html += `<tr>
+                    <td>${method}</td>
+                    <td>${(stats.success_rate * 100).toFixed(1)}%</td>
+                    <td>${stats.avg_time.toFixed(2)}s</td>
+                    <td>${stats.avg_attempts}</td>
+                </tr>`;
+            }
+            
+            html += '</tbody></table></div>';
+            resultsContent.innerHTML = html;
+        }
+    })
+    .catch(error => {
+        resultsContent.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.textContent = 'Start Benchmark';
+    });
+});
+</script>
+{% endblock %}

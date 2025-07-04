@@ -1,0 +1,131 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>Password Cracking Interface</h2>
+        <p class="text-muted">Select a user and attack method to demonstrate password cracking techniques.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Configure Attack</h5>
+                <form id="crackingForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Target User</label>
+                        <select class="form-control" id="username" name="username" required>
+                            <option value="">Select a user...</option>
+                            {% for user in users %}
+                            <option value="{{ user }}">{{ user }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="attack_type" class="form-label">Attack Method</label>
+                        <select class="form-control" id="attack_type" name="attack_type" required>
+                            <option value="">Select attack method...</option>
+                            <option value="dictionary">Dictionary Attack</option>
+                            <option value="brute_force">Brute Force Attack</option>
+                            <option value="hybrid">Hybrid Attack</option>
+                            <option value="mask">Mask Attack</option>
+                            <option value="rule_based">Rule-Based Attack</option>
+                            <option value="rainbow_table">Rainbow Table Attack</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="use_salt" name="use_salt">
+                            <label class="form-check-label" for="use_salt">
+                                Use salted hash (more secure)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-danger">Start Attack</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Attack Methods</h5>
+                <ul class="list-unstyled">
+                    <li><strong>Dictionary:</strong> Uses common passwords</li>
+                    <li><strong>Brute Force:</strong> Tries all combinations</li>
+                    <li><strong>Hybrid:</strong> Combines words with patterns</li>
+                    <li><strong>Mask:</strong> Uses password structures</li>
+                    <li><strong>Rule-Based:</strong> Applies transformations</li>
+                    <li><strong>Rainbow Table:</strong> Pre-computed hashes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4" id="resultsSection" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Attack Results</h5>
+                <div id="attackResults"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('crackingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsDiv = document.getElementById('attackResults');
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Running Attack...';
+    resultsDiv.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
+    resultsSection.style.display = 'block';
+    
+    fetch('/crack/execute', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            resultsDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+        } else {
+            const successClass = data.success ? 'alert-success' : 'alert-warning';
+            const statusText = data.success ? 'SUCCESS' : 'FAILED';
+            
+            resultsDiv.innerHTML = `
+                <div class="alert ${successClass}">
+                    <h6>Attack Status: ${statusText}</h6>
+                    ${data.success ? `<p><strong>Password Found:</strong> ${data.password}</p>` : ''}
+                    <p><strong>Attempts:</strong> ${data.attempts}</p>
+                    <p><strong>Time Elapsed:</strong> ${data.elapsed.toFixed(2)} seconds</p>
+                    <p><strong>Rate:</strong> ${data.rate.toFixed(2)} attempts/second</p>
+                    <p><small>Results saved to: ${data.saved_to}</small></p>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Start Attack';
+    });
+});
+</script>
+{% endblock %}
