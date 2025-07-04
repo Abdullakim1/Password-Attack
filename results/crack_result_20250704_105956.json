@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-07-04T10:59:56.790116",
+  "attack_type": "dictionary",
+  "username": "sakura",
+  "target_hash": "eb5c39bbce87cc0b76e79990d47ac8c3adeef049cbf53ef23bf6719c49f32a71",
+  "success": false,
+  "password_found": null,
+  "attempts": 732253,
+  "elapsed_time_seconds": 0.8674635887145996,
+  "rate_per_second": 844131.1076641805,
+  "salt_used": false
+}

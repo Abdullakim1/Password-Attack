@@ -1,0 +1,77 @@
+{
+  "timestamp": 1751619576.7935443,
+  "results": [
+    {
+      "test_type": "hash_verification",
+      "iterations": 100000,
+      "elapsed_time": 0.08658194541931152,
+      "rate_per_second": 1154975.2031524077
+    },
+    {
+      "test_type": "dictionary_attack",
+      "target_password": "123456",
+      "success": true,
+      "found_password": "123456",
+      "attempts": 363906,
+      "elapsed_time": 0.4326796531677246,
+      "rate_per_second": 841051.7974112707
+    },
+    {
+      "test_type": "dictionary_attack",
+      "target_password": "password",
+      "success": true,
+      "found_password": "password",
+      "attempts": 336042,
+      "elapsed_time": 0.396700382232666,
+      "rate_per_second": 847092.7053529036
+    },
+    {
+      "test_type": "dictionary_attack",
+      "target_password": "admin",
+      "success": true,
+      "found_password": "admin",
+      "attempts": 647698,
+      "elapsed_time": 0.7701401710510254,
+      "rate_per_second": 841013.1354608783
+    }
+  ],
+  "summary": {
+    "hash_verification": [
+      {
+        "test_type": "hash_verification",
+        "iterations": 100000,
+        "elapsed_time": 0.08658194541931152,
+        "rate_per_second": 1154975.2031524077
+      }
+    ],
+    "dictionary_attack": [
+      {
+        "test_type": "dictionary_attack",
+        "target_password": "123456",
+        "success": true,
+        "found_password": "123456",
+        "attempts": 363906,
+        "elapsed_time": 0.4326796531677246,
+        "rate_per_second": 841051.7974112707
+      },
+      {
+        "test_type": "dictionary_attack",
+        "target_password": "password",
+        "success": true,
+        "found_password": "password",
+        "attempts": 336042,
+        "elapsed_time": 0.396700382232666,
+        "rate_per_second": 847092.7053529036
+      },
+      {
+        "test_type": "dictionary_attack",
+        "target_password": "admin",
+        "success": true,
+        "found_password": "admin",
+        "attempts": 647698,
+        "elapsed_time": 0.7701401710510254,
+        "rate_per_second": 841013.1354608783
+      }
+    ]
+  }
+}

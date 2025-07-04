@@ -1,0 +1,77 @@
+{
+  "timestamp": 1751619380.2357192,
+  "results": [
+    {
+      "test_type": "hash_verification",
+      "iterations": 100000,
+      "elapsed_time": 0.06574511528015137,
+      "rate_per_second": 1521025.5480408333
+    },
+    {
+      "test_type": "dictionary_attack",
+      "target_password": "123456",
+      "success": true,
+      "found_password": "123456",
+      "attempts": 685606,
+      "elapsed_time": 0.7219600677490234,
+      "rate_per_second": 949645.3206028823
+    },
+    {
+      "test_type": "dictionary_attack",
+      "target_password": "password",
+      "success": true,
+      "found_password": "password",
+      "attempts": 125297,
+      "elapsed_time": 0.14564037322998047,
+      "rate_per_second": 860317.7623154242
+    },
+    {
+      "test_type": "dictionary_attack",
+      "target_password": "admin",
+      "success": true,
+      "found_password": "admin",
+      "attempts": 729508,
+      "elapsed_time": 0.9216334819793701,
+      "rate_per_second": 791538.0834833096
+    }
+  ],
+  "summary": {
+    "hash_verification": [
+      {
+        "test_type": "hash_verification",
+        "iterations": 100000,
+        "elapsed_time": 0.06574511528015137,
+        "rate_per_second": 1521025.5480408333
+      }
+    ],
+    "dictionary_attack": [
+      {
+        "test_type": "dictionary_attack",
+        "target_password": "123456",
+        "success": true,
+        "found_password": "123456",
+        "attempts": 685606,
+        "elapsed_time": 0.7219600677490234,
+        "rate_per_second": 949645.3206028823
+      },
+      {
+        "test_type": "dictionary_attack",
+        "target_password": "password",
+        "success": true,
+        "found_password": "password",
+        "attempts": 125297,
+        "elapsed_time": 0.14564037322998047,
+        "rate_per_second": 860317.7623154242
+      },
+      {
+        "test_type": "dictionary_attack",
+        "target_password": "admin",
+        "success": true,
+        "found_password": "admin",
+        "attempts": 729508,
+        "elapsed_time": 0.9216334819793701,
+        "rate_per_second": 791538.0834833096
+      }
+    ]
+  }
+}
