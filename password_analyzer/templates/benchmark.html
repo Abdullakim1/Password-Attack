@@ -17,11 +17,7 @@
                 <form id="benchmarkForm">
                     <div class="mb-3">
                         <label for="test_passwords" class="form-label">Test Passwords (one per line)</label>
-                        <textarea class="form-control" id="test_passwords" name="test_passwords" rows="5" placeholder="password&#10;123456&#10;admin&#10;test&#10;hello">password
-123456
-admin
-test
-hello</textarea>
+                        <textarea class="form-control" id="test_passwords" name="test_passwords" rows="5"></textarea>
                         <small class="form-text text-muted">Add passwords to test against. Use simple passwords for faster results.</small>
                     </div>
                     
@@ -30,21 +26,7 @@ hello</textarea>
                         <input type="number" class="form-control" id="max_time" name="max_time" value="30" min="10" max="300">
                     </div>
                     
-                    <div class="mb-3">
-                        <label class="form-label">Attack Methods to Test</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="test_dictionary" name="test_methods" value="dictionary" checked>
-                            <label class="form-check-label" for="test_dictionary">Dictionary Attack</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="test_brute_force" name="test_methods" value="brute_force" checked>
-                            <label class="form-check-label" for="test_brute_force">Brute Force Attack</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="test_hybrid" name="test_methods" value="hybrid" checked>
-                            <label class="form-check-label" for="test_hybrid">Hybrid Attack</label>
-                        </div>
-                    </div>
+                    
                     
                     <button type="submit" class="btn btn-primary">Run Comprehensive Benchmark</button>
                 </form>
@@ -236,7 +218,6 @@ function displayBenchmarkResults(data) {
     if (data.saved_to) {
         html += `<div class="alert alert-info mt-3">
             <strong>Results saved to:</strong> ${data.saved_to}
-            <a href="/download/${data.saved_to}" class="btn btn-sm btn-outline-primary ms-2">Download Report</a>
         </div>`;
     }
     

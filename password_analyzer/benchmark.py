@@ -1,4 +1,3 @@
-
 """
 Performance benchmarking module.
 Benchmarks different attack methods and generates performance reports.
@@ -13,6 +12,9 @@ from .base import HashVerifier
 from .attacks.dictionary_attack import DictionaryAttack
 from .attacks.brute_force_attack import BruteForceAttack
 from .attacks.hybrid_attack import HybridAttack
+from .attacks.mask_attack import MaskAttack
+from .attacks.rule_based_attack import RuleBasedAttack
+from .attacks.rainbow_table_attack import RainbowTableAttack
 
 class PerformanceBenchmark:
     
@@ -72,17 +74,17 @@ class PerformanceBenchmark:
         """Benchmark brute force attack performance with max time"""
         print(f"\n{Fore.YELLOW}Benchmarking brute force attack...{Style.RESET_ALL}")
         
-        if len(target_password) > max_length:
-            print(f"{Fore.RED}Password too long for benchmark (max {max_length} chars){Style.RESET_ALL}")
-            return None
+        # Removed the condition: if len(target_password) > max_length:
+        # The brute force attack will now only be limited by max_time.
         
         hash_verifier = HashVerifier()
         target_hash = hashlib.sha256(target_password.encode()).hexdigest()
         
+        # Pass max_time to the BruteForceAttack constructor
         attack = BruteForceAttack(hash_verifier, max_time=max_time)
         
         start_time = time.time()
-        success, found_password, attempts, elapsed = attack.execute(target_hash)
+        success, found_password, attempts, elapsed = attack.execute(target_hash, max_time=max_time) # Pass max_time to execute
         
         result = {
             'test_type': 'brute_force_attack',
@@ -119,7 +121,81 @@ class PerformanceBenchmark:
         }
         
         return result
-    
+
+    def benchmark_mask_attack(self, target_password, mask_pattern_choice="?l?l?l?l"):
+        """Benchmark mask attack performance."""
+        print(f"\n{Fore.YELLOW}Benchmarking mask attack...{Style.RESET_ALL}")
+        
+        hash_verifier = HashVerifier()
+        target_hash = hashlib.sha256(target_password.encode()).hexdigest()
+        
+        attack = MaskAttack(hash_verifier)
+        
+        start_time = time.time()
+        success, found_password, attempts, elapsed = attack.execute(
+            target_hash, mask_pattern_choice=mask_pattern_choice
+        )
+        
+        result = {
+            'test_type': 'mask_attack',
+            'target_password': target_password,
+            'success': success,
+            'found_password': found_password,
+            'attempts': attempts,
+            'elapsed_time': elapsed,
+            'rate_per_second': attempts / elapsed if elapsed > 0 else 0
+        }
+        
+        return result
+
+    def benchmark_rule_based_attack(self, target_password):
+        """Benchmark rule-based attack performance."""
+        print(f"\n{Fore.YELLOW}Benchmarking rule-based attack...{Style.RESET_ALL}")
+        
+        hash_verifier = HashVerifier()
+        target_hash = hashlib.sha256(target_password.encode()).hexdigest()
+        
+        attack = RuleBasedAttack(hash_verifier)
+        
+        start_time = time.time()
+        success, found_password, attempts, elapsed = attack.execute(target_hash)
+        
+        result = {
+            'test_type': 'rule_based_attack',
+            'target_password': target_password,
+            'success': success,
+            'found_password': found_password,
+            'attempts': attempts,
+            'elapsed_time': elapsed,
+            'rate_per_second': attempts / elapsed if elapsed > 0 else 0
+        }
+        
+        return result
+
+    def benchmark_rainbow_table_attack(self, target_password):
+        """Benchmark rainbow table attack performance."""
+        print(f"\n{Fore.YELLOW}Benchmarking rainbow table attack...{Style.RESET_ALL}")
+        
+        hash_verifier = HashVerifier()
+        target_hash = hashlib.sha256(target_password.encode()).hexdigest()
+        
+        attack = RainbowTableAttack(hash_verifier)
+        
+        start_time = time.time()
+        success, found_password, attempts, elapsed = attack.execute(target_hash)
+        
+        result = {
+            'test_type': 'rainbow_table_attack',
+            'target_password': target_password,
+            'success': success,
+            'found_password': found_password,
+            'attempts': attempts,
+            'elapsed_time': elapsed,
+            'rate_per_second': attempts / elapsed if elapsed > 0 else 0
+        }
+        
+        return result
+
     def run_comprehensive_benchmark(self):
         """Run comprehensive benchmark of all attack methods"""
         print(f"\n{Fore.CYAN}=== Comprehensive Performance Benchmark ==={Style.RESET_ALL}")
@@ -141,7 +217,11 @@ class PerformanceBenchmark:
             
             # Brute force attack
             try:
-                bf_result = self.benchmark_brute_force_attack(password)
+                # Pass max_time from the web interface if available, otherwise use a default
+                # The max_time here should ideally come from the form submission in benchmark.html
+                # For this example, let's assume a default if not explicitly passed.
+                # In a real scenario, this would be passed from the web_interface.py's run_benchmark function.
+                bf_result = self.benchmark_brute_force_attack(password, max_time=self.max_time_per_test if hasattr(self, 'max_time_per_test') else 60)
                 if bf_result:
                     results.append(bf_result)
             except Exception as e:
@@ -156,6 +236,33 @@ class PerformanceBenchmark:
             except Exception as e:
                 print(f"{Fore.RED}Hybrid attack failed: {e}{Style.RESET_ALL}")
                 logging.error(f"Hybrid attack failed for {password}: {e}")
+            
+            # Add Mask attack
+            try:
+                mask_result = self.benchmark_mask_attack(password)
+                if mask_result:
+                    results.append(mask_result)
+            except Exception as e:
+                print(f"{Fore.RED}Mask attack failed: {e}{Style.RESET_ALL}")
+                logging.error(f"Mask attack failed for {password}: {e}")
+
+            # Add Rule-Based attack
+            try:
+                rule_based_result = self.benchmark_rule_based_attack(password)
+                if rule_based_result:
+                    results.append(rule_based_result)
+            except Exception as e:
+                print(f"{Fore.RED}Rule-based attack failed: {e}{Style.RESET_ALL}")
+                logging.error(f"Rule-based attack failed for {password}: {e}")
+
+            # Add Rainbow Table attack
+            try:
+                rainbow_table_result = self.benchmark_rainbow_table_attack(password)
+                if rainbow_table_result:
+                    results.append(rainbow_table_result)
+            except Exception as e:
+                print(f"{Fore.RED}Rainbow Table attack failed: {e}{Style.RESET_ALL}")
+                logging.error(f"Rainbow Table attack failed for {password}: {e}")
         
         return results
     
