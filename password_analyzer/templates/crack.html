@@ -27,7 +27,7 @@
                     
                     <div class="mb-3">
                         <label for="attack_type" class="form-label">Attack Method</label>
-                        <select class="form-control" id="attack_type" name="attack_type" required>
+                        <select class="form-control" id="attack_type" name="attack_type" required onchange="showAttackOptions()">
                             <option value="">Select attack method...</option>
                             <option value="dictionary">Dictionary Attack</option>
                             <option value="brute_force">Brute Force Attack</option>
@@ -36,6 +36,84 @@
                             <option value="rule_based">Rule-Based Attack</option>
                             <option value="rainbow_table">Rainbow Table Attack</option>
                         </select>
+                    </div>
+                    
+                    <!-- Brute Force Options -->
+                    <div id="bruteForceOptions" class="attack-options" style="display: none;">
+                        <div class="card mb-3">
+                            <div class="card-header">Brute Force Settings</div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="min_length" class="form-label">Minimum Length</label>
+                                        <input type="number" class="form-control" id="min_length" name="min_length" value="1" min="1" max="10">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="max_length" class="form-label">Maximum Length</label>
+                                        <input type="number" class="form-control" id="max_length" name="max_length" value="4" min="1" max="10">
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <label class="form-label">Character Sets</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="use_lowercase" name="use_lowercase" checked>
+                                        <label class="form-check-label" for="use_lowercase">Lowercase letters (a-z)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="use_uppercase" name="use_uppercase">
+                                        <label class="form-check-label" for="use_uppercase">Uppercase letters (A-Z)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="use_digits" name="use_digits">
+                                        <label class="form-check-label" for="use_digits">Digits (0-9)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="use_symbols" name="use_symbols">
+                                        <label class="form-check-label" for="use_symbols">Symbols (!@#$%^&*)</label>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="max_time" class="form-label">Maximum Time (seconds)</label>
+                                    <input type="number" class="form-control" id="max_time" name="max_time" value="60" min="10" max="300">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mask Attack Options -->
+                    <div id="maskOptions" class="attack-options" style="display: none;">
+                        <div class="card mb-3">
+                            <div class="card-header">Mask Attack Settings</div>
+                            <div class="card-body">
+                                <label for="mask_pattern" class="form-label">Mask Pattern</label>
+                                <select class="form-control" id="mask_pattern" name="mask_pattern">
+                                    <option value="?l?l?l?l">4 lowercase letters</option>
+                                    <option value="?u?l?l?l">1 upper + 3 lower</option>
+                                    <option value="?l?l?l?d">3 letters + 1 digit</option>
+                                    <option value="?l?l?d?d">2 letters + 2 digits</option>
+                                    <option value="?u?l?l?d?d">1 upper + 2 lower + 2 digits</option>
+                                    <option value="custom">Custom pattern</option>
+                                </select>
+                                <input type="text" class="form-control mt-2" id="custom_mask" name="custom_mask" placeholder="Enter custom mask (?l=lower, ?u=upper, ?d=digit, ?s=symbol)" style="display: none;">
+                                <small class="form-text text-muted">?l=lowercase, ?u=uppercase, ?d=digit, ?s=symbol</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dictionary Options -->
+                    <div id="dictionaryOptions" class="attack-options" style="display: none;">
+                        <div class="card mb-3">
+                            <div class="card-header">Dictionary Settings</div>
+                            <div class="card-body">
+                                <label for="wordlist" class="form-label">Wordlist</label>
+                                <select class="form-control" id="wordlist" name="wordlist">
+                                    <option value="common">Common passwords</option>
+                                    <option value="rockyou">RockYou top 10k</option>
+                                    <option value="leaked">Leaked passwords</option>
+                                    <option value="all">All wordlists</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-3">
@@ -65,6 +143,13 @@
                     <li><strong>Rule-Based:</strong> Applies transformations</li>
                     <li><strong>Rainbow Table:</strong> Pre-computed hashes</li>
                 </ul>
+                
+                <div id="estimatedTime" style="display: none;" class="mt-3">
+                    <div class="alert alert-info">
+                        <strong>Estimated combinations:</strong> <span id="combinations"></span><br>
+                        <strong>Estimated time:</strong> <span id="timeEstimate"></span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -76,12 +161,79 @@
             <div class="card-body">
                 <h5 class="card-title">Attack Results</h5>
                 <div id="attackResults"></div>
+                <div id="attackProgress" style="display: none;">
+                    <div class="progress mb-3">
+                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div id="progressText">Starting attack...</div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+function showAttackOptions() {
+    const attackType = document.getElementById('attack_type').value;
+    const options = document.querySelectorAll('.attack-options');
+    options.forEach(opt => opt.style.display = 'none');
+    
+    if (attackType === 'brute_force') {
+        document.getElementById('bruteForceOptions').style.display = 'block';
+        updateEstimation();
+    } else if (attackType === 'mask') {
+        document.getElementById('maskOptions').style.display = 'block';
+    } else if (attackType === 'dictionary') {
+        document.getElementById('dictionaryOptions').style.display = 'block';
+    }
+}
+
+function updateEstimation() {
+    const minLen = parseInt(document.getElementById('min_length').value) || 1;
+    const maxLen = parseInt(document.getElementById('max_length').value) || 4;
+    
+    let charset = 0;
+    if (document.getElementById('use_lowercase').checked) charset += 26;
+    if (document.getElementById('use_uppercase').checked) charset += 26;
+    if (document.getElementById('use_digits').checked) charset += 10;
+    if (document.getElementById('use_symbols').checked) charset += 8;
+    
+    if (charset > 0) {
+        let totalCombinations = 0;
+        for (let len = minLen; len <= maxLen; len++) {
+            totalCombinations += Math.pow(charset, len);
+        }
+        
+        const rate = 100000; // estimated attempts per second
+        const timeSeconds = totalCombinations / rate;
+        
+        document.getElementById('combinations').textContent = totalCombinations.toLocaleString();
+        document.getElementById('timeEstimate').textContent = formatTime(timeSeconds);
+        document.getElementById('estimatedTime').style.display = 'block';
+    }
+}
+
+function formatTime(seconds) {
+    if (seconds < 60) return `${seconds.toFixed(1)} seconds`;
+    if (seconds < 3600) return `${(seconds/60).toFixed(1)} minutes`;
+    if (seconds < 86400) return `${(seconds/3600).toFixed(1)} hours`;
+    return `${(seconds/86400).toFixed(1)} days`;
+}
+
+document.getElementById('mask_pattern').addEventListener('change', function() {
+    const customMask = document.getElementById('custom_mask');
+    if (this.value === 'custom') {
+        customMask.style.display = 'block';
+    } else {
+        customMask.style.display = 'none';
+    }
+});
+
+// Add event listeners for estimation updates
+['min_length', 'max_length', 'use_lowercase', 'use_uppercase', 'use_digits', 'use_symbols'].forEach(id => {
+    document.getElementById(id).addEventListener('change', updateEstimation);
+});
+
 document.getElementById('crackingForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -89,10 +241,12 @@ document.getElementById('crackingForm').addEventListener('submit', function(e) {
     const submitBtn = document.querySelector('button[type="submit"]');
     const resultsSection = document.getElementById('resultsSection');
     const resultsDiv = document.getElementById('attackResults');
+    const progressDiv = document.getElementById('attackProgress');
     
     submitBtn.disabled = true;
     submitBtn.textContent = 'Running Attack...';
-    resultsDiv.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
+    resultsDiv.innerHTML = '';
+    progressDiv.style.display = 'block';
     resultsSection.style.display = 'block';
     
     fetch('/crack/execute', {
@@ -101,6 +255,7 @@ document.getElementById('crackingForm').addEventListener('submit', function(e) {
     })
     .then(response => response.json())
     .then(data => {
+        progressDiv.style.display = 'none';
         if (data.error) {
             resultsDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
         } else {
@@ -120,6 +275,7 @@ document.getElementById('crackingForm').addEventListener('submit', function(e) {
         }
     })
     .catch(error => {
+        progressDiv.style.display = 'none';
         resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
     })
     .finally(() => {

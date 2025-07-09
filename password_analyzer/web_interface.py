@@ -25,6 +25,85 @@ def index():
     """Main dashboard"""
     return render_template('index.html')
 
+@app.route('/login')
+def login_page():
+    """Login and registration page"""
+    return render_template('login.html')
+
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    """API endpoint for user login"""
+    username = request.form.get('username', '').strip()
+    password = request.form.get('password', '')
+    
+    if not username or not password:
+        return jsonify({'success': False, 'message': 'Username and password are required'}), 400
+    
+    from .login.login_system import LoginSystem
+    login_system = LoginSystem()
+    
+    user_data = login_system.load_credentials(username)
+    if not user_data:
+        return jsonify({'success': False, 'message': 'Username not found!'}), 404
+    
+    if user_data['locked']:
+        return jsonify({'success': False, 'message': 'Account is locked due to too many failed attempts!'}), 403
+    
+    salted_hash = login_system.hash_with_salt(password, user_data['salt'])
+    if salted_hash == user_data['salted_hash']:
+        login_system.update_login_attempt(username, 0, False)
+        return jsonify({'success': True, 'message': f'Login successful! Welcome {username}'})
+    else:
+        failed_attempts = user_data['failed_attempts'] + 1
+        locked = failed_attempts >= 3
+        login_system.update_login_attempt(username, failed_attempts, locked)
+        
+        if locked:
+            return jsonify({'success': False, 'message': 'Too many failed attempts. Account locked!'}), 403
+        else:
+            return jsonify({'success': False, 'message': f'Invalid password! Attempts remaining: {3 - failed_attempts}'}), 401
+
+@app.route('/api/register', methods=['POST'])
+def api_register():
+    """API endpoint for user registration"""
+    username = request.form.get('username', '').strip()
+    password = request.form.get('password', '')
+    
+    if not username or not password:
+        return jsonify({'success': False, 'message': 'Username and password are required'}), 400
+    
+    from .login.login_system import LoginSystem
+    login_system = LoginSystem()
+    
+    if login_system.load_credentials(username):
+        return jsonify({'success': False, 'message': 'Username already exists!'}), 409
+    
+    salt = login_system.generate_salt()
+    unsalted_hash = login_system.hash_password(password)
+    salted_hash = login_system.hash_with_salt(password, salt)
+    
+    if login_system.save_credentials(username, unsalted_hash, salted_hash, salt):
+        return jsonify({'success': True, 'message': f'Registration successful! User {username} created.'})
+    else:
+        return jsonify({'success': False, 'message': 'Registration failed. Please try again.'}), 500
+
+@app.route('/api/reset', methods=['POST'])
+def api_reset():
+    """API endpoint for account reset"""
+    username = request.form.get('username', '').strip()
+    
+    if not username:
+        return jsonify({'success': False, 'message': 'Username is required'}), 400
+    
+    from .login.login_system import LoginSystem
+    login_system = LoginSystem()
+    
+    if login_system.load_credentials(username):
+        login_system.update_login_attempt(username, 0, False)
+        return jsonify({'success': True, 'message': f'Account {username} has been reset successfully.'})
+    else:
+        return jsonify({'success': False, 'message': 'Username not found!'}), 404
+
 @app.route('/analyze', methods=['GET', 'POST'])
 def analyze_password():
     """Password strength analysis page"""
@@ -126,7 +205,17 @@ def benchmark_page():
 def run_benchmark():
     """Run performance benchmark"""
     try:
-        results = benchmark.run_comprehensive_benchmark()
+        # Get test passwords from form
+        test_passwords_text = request.form.get('test_passwords', 'password\n123456\nadmin\ntest')
+        test_passwords = [pwd.strip() for pwd in test_passwords_text.split('\n') if pwd.strip()]
+        
+        max_time = int(request.form.get('max_time', 30))
+        
+        # Create benchmark with test passwords
+        benchmark_instance = PerformanceBenchmark()
+        benchmark_instance.test_passwords = test_passwords
+        
+        results = benchmark_instance.run_comprehensive_benchmark()
         if not results:
             return jsonify({'error': 'No benchmark results generated'}), 500
             

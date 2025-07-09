@@ -5,7 +5,7 @@
 <div class="row">
     <div class="col-12">
         <h2>Performance Benchmark</h2>
-        <p class="text-muted">Test and compare the performance of different password cracking methods.</p>
+        <p class="text-muted">Test the performance of different password cracking methods with various password complexities.</p>
     </div>
 </div>
 
@@ -13,17 +13,41 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Run Benchmark</h5>
-                <p>This will test all attack methods against various password complexities.</p>
-                <div class="mb-3">
-                    <label for="customPassword" class="form-label">Custom Password</label>
-                    <input type="password" class="form-control" id="customPassword" placeholder="Enter password to test">
-                </div>
-                <div class="mb-3">
-                    <label for="maxTime" class="form-label">Max Time (seconds)</label>
-                    <input type="number" class="form-control" id="maxTime" placeholder="Enter maximum time">
-                </div>
-                <button id="runBenchmark" class="btn btn-info">Start Benchmark</button>
+                <h5 class="card-title">Benchmark Configuration</h5>
+                <form id="benchmarkForm">
+                    <div class="mb-3">
+                        <label for="test_passwords" class="form-label">Test Passwords (one per line)</label>
+                        <textarea class="form-control" id="test_passwords" name="test_passwords" rows="5" placeholder="password&#10;123456&#10;admin&#10;test&#10;hello">password
+123456
+admin
+test
+hello</textarea>
+                        <small class="form-text text-muted">Add passwords to test against. Use simple passwords for faster results.</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="max_time" class="form-label">Maximum Time per Test (seconds)</label>
+                        <input type="number" class="form-control" id="max_time" name="max_time" value="30" min="10" max="300">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Attack Methods to Test</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="test_dictionary" name="test_methods" value="dictionary" checked>
+                            <label class="form-check-label" for="test_dictionary">Dictionary Attack</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="test_brute_force" name="test_methods" value="brute_force" checked>
+                            <label class="form-check-label" for="test_brute_force">Brute Force Attack</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="test_hybrid" name="test_methods" value="hybrid" checked>
+                            <label class="form-check-label" for="test_hybrid">Hybrid Attack</label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Run Comprehensive Benchmark</button>
+                </form>
             </div>
         </div>
     </div>
@@ -31,13 +55,17 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">What Gets Tested</h5>
+                <h5 class="card-title">Benchmark Info</h5>
+                <p>This benchmark will test:</p>
                 <ul>
-                    <li>Dictionary attacks on common passwords</li>
-                    <li>Brute force on short passwords</li>
-                    <li>Hybrid attacks with patterns</li>
-                    <li>Performance metrics and comparisons</li>
+                    <li>Password cracking speed for each method</li>
+                    <li>Success rates for different password types</li>
+                    <li>Performance comparison between methods</li>
+                    <li>Time taken for each attack type</li>
                 </ul>
+                <div class="alert alert-warning">
+                    <strong>Note:</strong> Use simple passwords for faster benchmark results. Complex passwords may take a very long time to crack.
+                </div>
             </div>
         </div>
     </div>
@@ -48,6 +76,12 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Benchmark Results</h5>
+                <div id="benchmarkProgress" class="mb-3" style="display: none;">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div id="progressText" class="mt-2">Preparing benchmark...</div>
+                </div>
                 <div id="resultsContent"></div>
             </div>
         </div>
@@ -55,56 +89,158 @@
 </div>
 
 <script>
-document.getElementById('runBenchmark').addEventListener('click', function() {
-    const button = this;
-    const resultsSection = document.getElementById('benchmarkResults');
-    const resultsContent = document.getElementById('resultsContent');
-    const customPassword = document.getElementById('customPassword').value;
-    const maxTime = document.getElementById('maxTime').value;
+document.getElementById('benchmarkForm').addEventListener('submit', function(e) {
+    e.preventDefault();
     
-    button.disabled = true;
-    button.textContent = 'Running Benchmark...';
-    resultsContent.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
+    const formData = new FormData(this);
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const resultsSection = document.getElementById('benchmarkResults');
+    const progressDiv = document.getElementById('benchmarkProgress');
+    const resultsContent = document.getElementById('resultsContent');
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Running Benchmark...';
     resultsSection.style.display = 'block';
+    progressDiv.style.display = 'block';
+    resultsContent.innerHTML = '';
+    
+    // Show progress
+    let progress = 0;
+    const progressBar = document.querySelector('.progress-bar');
+    const progressText = document.getElementById('progressText');
+    
+    const progressInterval = setInterval(() => {
+        progress += 2;
+        if (progress <= 90) {
+            progressBar.style.width = progress + '%';
+            progressText.textContent = `Running benchmark... ${progress}%`;
+        }
+    }, 1000);
     
     fetch('/benchmark/run', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ password: customPassword, max_time: maxTime })
+        body: formData
     })
     .then(response => response.json())
     .then(data => {
+        clearInterval(progressInterval);
+        progressBar.style.width = '100%';
+        progressText.textContent = 'Benchmark completed!';
+        
+        setTimeout(() => {
+            progressDiv.style.display = 'none';
+        }, 2000);
+        
         if (data.error) {
-            resultsContent.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+            resultsContent.innerHTML = `<div class="alert alert-danger">Error: ${data.error}</div>`;
         } else {
-            let html = '<div class="alert alert-success">Benchmark completed successfully!</div>';
-            html += `<p><strong>Results saved to:</strong> ${data.saved_to}</p>`;
-            html += '<h6>Performance Summary:</h6>';
-            html += '<div class="table-responsive"><table class="table table-striped">';
-            html += '<thead><tr><th>Attack Method</th><th>Success Rate</th><th>Avg Time</th><th>Avg Attempts</th></tr></thead><tbody>';
-            
-            for (const [method, stats] of Object.entries(data.results)) {
-                html += `<tr>
-                    <td>${method}</td>
-                    <td>${(stats.success_rate * 100).toFixed(1)}%</td>
-                    <td>${stats.avg_time.toFixed(2)}s</td>
-                    <td>${stats.avg_attempts}</td>
-                </tr>`;
-            }
-            
-            html += '</tbody></table></div>';
-            resultsContent.innerHTML = html;
+            displayBenchmarkResults(data);
         }
     })
     .catch(error => {
+        clearInterval(progressInterval);
+        progressDiv.style.display = 'none';
         resultsContent.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
     })
     .finally(() => {
-        button.disabled = false;
-        button.textContent = 'Start Benchmark';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Run Comprehensive Benchmark';
     });
 });
+
+function displayBenchmarkResults(data) {
+    const resultsContent = document.getElementById('resultsContent');
+    
+    if (!data.results || Object.keys(data.results).length === 0) {
+        resultsContent.innerHTML = '<div class="alert alert-warning">No benchmark results to display.</div>';
+        return;
+    }
+    
+    let html = '<div class="row">';
+    
+    // Summary cards
+    html += '<div class="col-md-12 mb-4">';
+    html += '<h6>Benchmark Summary</h6>';
+    html += '<div class="row">';
+    
+    for (const [testType, data_summary] of Object.entries(data.results)) {
+        const successRate = (data_summary.success_rate * 100).toFixed(1);
+        const avgTime = data_summary.avg_time.toFixed(2);
+        const avgAttempts = Math.round(data_summary.avg_attempts);
+        
+        html += `
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">${testType.replace('_', ' ').toUpperCase()}</h6>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-2">
+                                    <small class="text-muted">Success Rate</small>
+                                    <div class="h5 text-${successRate > 50 ? 'success' : 'warning'}">${successRate}%</div>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Avg Time</small>
+                                    <div class="h6">${avgTime}s</div>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Avg Attempts</small>
+                                    <div class="h6">${avgAttempts.toLocaleString()}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    html += '</div></div>';
+    
+    // Detailed results table
+    html += '<div class="col-md-12">';
+    html += '<h6>Detailed Results</h6>';
+    html += '<div class="table-responsive">';
+    html += '<table class="table table-striped">';
+    html += '<thead><tr><th>Test Type</th><th>Password</th><th>Success</th><th>Found Password</th><th>Attempts</th><th>Time (s)</th><th>Rate (att/s)</th></tr></thead>';
+    html += '<tbody>';
+    
+    for (const [testType, testData] of Object.entries(data.results)) {
+        for (const result of testData.tests) {
+            const success = result.success ? '<span class="badge bg-success">YES</span>' : '<span class="badge bg-danger">NO</span>';
+            const foundPassword = result.found_password || '-';
+            const attempts = result.attempts ? result.attempts.toLocaleString() : '0';
+            const time = result.elapsed_time ? result.elapsed_time.toFixed(2) : '0.00';
+            const rate = result.rate_per_second ? result.rate_per_second.toFixed(0) : '0';
+            
+            html += `
+                <tr>
+                    <td>${testType.replace('_', ' ')}</td>
+                    <td><code>${result.target_password || 'N/A'}</code></td>
+                    <td>${success}</td>
+                    <td><code>${foundPassword}</code></td>
+                    <td>${attempts}</td>
+                    <td>${time}</td>
+                    <td>${rate}</td>
+                </tr>
+            `;
+        }
+    }
+    
+    html += '</tbody></table>';
+    html += '</div>';
+    html += '</div>';
+    
+    html += '</div>';
+    
+    if (data.saved_to) {
+        html += `<div class="alert alert-info mt-3">
+            <strong>Results saved to:</strong> ${data.saved_to}
+            <a href="/download/${data.saved_to}" class="btn btn-sm btn-outline-primary ms-2">Download Report</a>
+        </div>`;
+    }
+    
+    resultsContent.innerHTML = html;
+}
 </script>
 {% endblock %}
