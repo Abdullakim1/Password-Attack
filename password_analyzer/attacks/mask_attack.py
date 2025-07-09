@@ -19,34 +19,33 @@ class MaskAttack(PasswordAttack):
         self.numbers = string.digits
         self.symbols = string.punctuation
     
-    def execute(self, target_hash, **kwargs):
+    def execute(self, target_hash, mask_pattern_choice=None, custom_mask=None, **kwargs):
         
         print(f"\n{Fore.YELLOW}Starting mask attack...{Style.RESET_ALL}")
 
-        masks = [
-            ("4 lowercase & 2 digits at the end", "?l?l?l?l?d?d"),
-            ("3 lowercase & 3 digits at the end", "?l?l?l?d?d?d"),
-            ("1 uppercase 3 lowercase 2 digits at the end", "?u?l?l?l?d?d"),
-            ("4 lowercase & symbol and digit at the end", "?l?l?l?l?s?d"),
-            ("6 digits", "?d?d?d?d?d?d"),
-            ("3 combination(w) 2 digits & symbol at the end", "?w?w?w?d?d?s")
-        ]
+        masks_map = {
+            "?l?l?l?l": ("4 lowercase letters", "?l?l?l?l"),
+            "?u?l?l?l": ("1 upper + 3 lower", "?u?l?l?l"),
+            "?l?l?l?d": ("3 letters + 1 digit", "?l?l?l?d"),
+            "?l?l?d?d": ("2 letters + 2 digits", "?l?l?d?d"),
+            "?u?l?l?d?d": ("1 upper + 2 lower + 2 digits", "?u?l?l?d?d"),
+            "?d?d?d?d?d?d": ("6 digits", "?d?d?d?d?d?d"),
+            "?w?w?w?d?d?s": ("3 combination(w) 2 digits & symbol at the end", "?w?w?w?d?d?s"),
+            "common": ("Common passwords", "?c")
+        }
 
-        print("\nAvailable Mask Patterns:")
-        for idx, (desc, _) in enumerate(masks, start=1):
-            print(f"{idx}. {desc}")
+        mask = None
+        desc = "Custom mask"
 
-        selection = input("Choose a mask number (1-6): ").strip()
-
-        try:
-            selected_index = int(selection) - 1
-            if not 0 <= selected_index < len(masks):
-                raise ValueError
-        except ValueError:
-            print(f"{Fore.RED}Invalid selection. Aborting mask attack.{Style.RESET_ALL}")
+        if mask_pattern_choice == 'custom' and custom_mask:
+            mask = custom_mask
+        elif mask_pattern_choice in masks_map:
+            desc, mask = masks_map[mask_pattern_choice]
+        
+        if not mask:
+            print(f"{Fore.RED}No valid mask pattern selected. Aborting mask attack.{Style.RESET_ALL}")
             return False, None, 0, 0
 
-        desc, mask = masks[selected_index]
         print(f"\n{Fore.CYAN}Selected pattern: {desc}")
         print(f"Mask pattern: {mask}{Style.RESET_ALL}")
 
@@ -63,7 +62,7 @@ class MaskAttack(PasswordAttack):
                 if attempts % 50000 == 0:
                     elapsed = time.time() - start_time
                     rate = attempts / elapsed if elapsed > 0 else 0
-                    print(f"{Fore.CYAN}Progress: {attempts:,}, Current: {password}, "
+                    print(f"\r{Fore.CYAN}Progress: {attempts:,}, Current: {password}, "
                         f"Time: {elapsed:.1f}s, Rate: {rate:.0f} tries/sec{Style.RESET_ALL}"
                         )
 
@@ -92,12 +91,26 @@ class MaskAttack(PasswordAttack):
             '?w': self.lowercase + self.uppercase + self.numbers
         }
 
-        positions = []
-        for i in range(0, len(mask), 2):
-            char_type = mask[i:i+2]
-            if char_type in charset_map:
-                positions.append(charset_map[char_type])
+        tokens = []
+        i = 0
+        while i < len(mask):
+            if mask[i] == '?':
+                tokens.append(mask[i:i+2])
+                i += 2
+            else:
+                tokens.append(mask[i])
+                i += 1
 
+        positions = []
+        for token in tokens:
+            if token in charset_map:
+                positions.append(charset_map[token])
+            elif len(token) == 1:
+                positions.append(token)
+            else:
+                print(f"{Fore.RED}Warning: Unknown mask token '{token}'. Skipping.{Style.RESET_ALL}")
+                return []
+        
         all_combinations = []
         for combo in itertools.product(*positions):
             all_combinations.append(''.join(combo))

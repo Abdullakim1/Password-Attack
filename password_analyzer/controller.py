@@ -59,35 +59,35 @@ class PasswordCrackingController:
 
         return username, hash_value
     
-    def run_dictionary_attack(self, target_hash):
+    def run_dictionary_attack(self, target_hash, **kwargs):
         
         attack = DictionaryAttack(self.hash_verifier)
-        return attack.execute(target_hash)
+        return attack.execute(target_hash, **kwargs)
     
-    def run_brute_force_attack(self, target_hash):
+    def run_brute_force_attack(self, target_hash, **kwargs):
         
         attack = BruteForceAttack(self.hash_verifier)
-        return attack.execute(target_hash)
+        return attack.execute(target_hash, **kwargs)
     
-    def run_hybrid_attack(self, target_hash, username=None):
+    def run_hybrid_attack(self, target_hash, username=None, **kwargs):
         
         attack = HybridAttack(self.hash_verifier)
-        return attack.execute(target_hash, username=username)
+        return attack.execute(target_hash, username=username, **kwargs)
     
-    def run_mask_attack(self, target_hash):
+    def run_mask_attack(self, target_hash, **kwargs):
         
         attack = MaskAttack(self.hash_verifier)
-        return attack.execute(target_hash)
+        return attack.execute(target_hash, **kwargs)
     
-    def run_rule_based_attack(self, target_hash):
+    def run_rule_based_attack(self, target_hash, **kwargs):
         
         attack = RuleBasedAttack(self.hash_verifier)
-        return attack.execute(target_hash)
+        return attack.execute(target_hash, **kwargs)
     
-    def run_rainbow_table_attack(self, target_hash):
+    def run_rainbow_table_attack(self, target_hash, **kwargs):
         
         attack = RainbowTableAttack(self.hash_verifier)
-        return attack.execute(target_hash)
+        return attack.execute(target_hash, **kwargs)
     
     def analyze_password_strength(self, password):
         """Analyze password strength before cracking"""

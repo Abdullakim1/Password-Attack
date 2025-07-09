@@ -1,4 +1,3 @@
-
 """
 Web interface for password analyzer using Flask.
 Provides a user-friendly web interface for all password analysis features.
@@ -158,20 +157,42 @@ def execute_crack():
     controller.hash_verifier.using_salt = use_salt
     controller.hash_verifier.current_salt = salt
     
+    # Prepare parameters for attack
+    attack_params = {}
+    if attack_type == 'brute_force':
+        attack_params['min_length'] = int(request.form.get('min_length', 1))
+        attack_params['max_length'] = int(request.form.get('max_length', 4))
+        attack_params['use_lowercase'] = request.form.get('use_lowercase') == 'on'
+        attack_params['use_uppercase'] = request.form.get('use_uppercase') == 'on'
+        attack_params['use_digits'] = request.form.get('use_digits') == 'on'
+        attack_params['use_symbols'] = request.form.get('use_symbols') == 'on'
+        attack_params['max_time'] = int(request.form.get('max_time', 60))
+    elif attack_type == 'mask':
+        mask_pattern_choice = request.form.get('mask_pattern')
+        attack_params['mask_pattern_choice'] = mask_pattern_choice
+        if mask_pattern_choice == 'custom':
+            attack_params['custom_mask'] = request.form.get('custom_mask')
+    elif attack_type == 'dictionary':
+        # The dictionary attack (dictionary_attack.py) does not currently take wordlist type as parameter in `execute`
+        # It calls self.wordlist_manager.download_wordlists() and load_wordlists() internally.
+        # So no specific parameter needs to be passed to `execute` for now.
+        pass
+
+
     # Execute attack
     try:
         if attack_type == 'dictionary':
-            success, password, attempts, elapsed = controller.run_dictionary_attack(hash_value)
+            success, password, attempts, elapsed = controller.run_dictionary_attack(hash_value, **attack_params)
         elif attack_type == 'brute_force':
-            success, password, attempts, elapsed = controller.run_brute_force_attack(hash_value)
+            success, password, attempts, elapsed = controller.run_brute_force_attack(hash_value, **attack_params)
         elif attack_type == 'hybrid':
-            success, password, attempts, elapsed = controller.run_hybrid_attack(hash_value, username)
+            success, password, attempts, elapsed = controller.run_hybrid_attack(hash_value, username=username, **attack_params)
         elif attack_type == 'mask':
-            success, password, attempts, elapsed = controller.run_mask_attack(hash_value)
+            success, password, attempts, elapsed = controller.run_mask_attack(hash_value, **attack_params)
         elif attack_type == 'rule_based':
-            success, password, attempts, elapsed = controller.run_rule_based_attack(hash_value)
+            success, password, attempts, elapsed = controller.run_rule_based_attack(hash_value, **attack_params)
         elif attack_type == 'rainbow_table':
-            success, password, attempts, elapsed = controller.run_rainbow_table_attack(hash_value)
+            success, password, attempts, elapsed = controller.run_rainbow_table_attack(hash_value, **attack_params)
         else:
             return jsonify({'error': 'Invalid attack type'}), 400
         
@@ -194,6 +215,7 @@ def execute_crack():
         })
         
     except Exception as e:
+        app.logger.error(f"Crack execution error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/benchmark')

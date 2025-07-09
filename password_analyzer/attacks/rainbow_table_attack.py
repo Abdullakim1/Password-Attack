@@ -27,49 +27,51 @@ class RainbowTableAttack(PasswordAttack):
             
         start_time = time.time()
         
-        rainbow_table = self.generate_rainbow_table(4) 
-        total_attempts = len(rainbow_table)
-        
+        # Generate a small rainbow table for demonstration purposes
+        # Note: A real-world rainbow table for any practical length is enormous.
+        rainbow_table = self.generate_rainbow_table(4) # Generate table for passwords up to 4 chars
+        total_table_entries = len(rainbow_table) 
+
         if using_salt:
-            print(f"\n{Fore.CYAN}Trying each password with the salt...{Style.RESET_ALL}")
-            print(f"{Fore.YELLOW}This means computing {total_attempts:,} new hashes! Please be patient...{Style.RESET_ALL}")
+            print(f"\n{Fore.CYAN}Trying each password from the table with the salt...{Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}This means computing {total_table_entries:,} new hashes! Please be patient...{Style.RESET_ALL}")
             
-            attempts = 0
-            for password in rainbow_table.values():
-                attempts += 1
-                if attempts % 200000 == 0:
-                    elapsed = time.time() - start_time
-                    rate = int(attempts/elapsed) if elapsed > 0 else 0
-                    print(f"{Fore.CYAN}Progress: {attempts:,}/{total_attempts:,} hashes tried ({rate:,}/sec){Style.RESET_ALL}", end='\r')
+            attempts_made_salted = 0
+            try:
+                # When using salt, rainbow table becomes a glorified wordlist, as each entry needs to be re-hashed with the specific salt.
+                for password_candidate in rainbow_table.values():
+                    attempts_made_salted += 1
+                    if attempts_made_salted % 200000 == 0:
+                        elapsed = time.time() - start_time
+                        rate = int(attempts_made_salted/elapsed) if elapsed > 0 else 0
+                        print(f"{Fore.CYAN}Progress: {attempts_made_salted:,}/{total_table_entries:,} hashes tried ({rate:,}/sec){Style.RESET_ALL}", end='\r')
+                        
+                    salted = password_candidate + current_salt
+                    hash_value_computed = hashlib.sha256(salted.encode()).hexdigest()
                     
-                salted = password + current_salt
-                hash_value = hashlib.sha256(salted.encode()).hexdigest()
-                
-                if hash_value == target_hash:
-                    self.print_salted_success_stats(password, attempts, start_time)
-                    return True
-        else:
-            if target_hash in rainbow_table:
-                password = rainbow_table[target_hash]
-                lookup_time = time.time() - start_time 
-                self.print_unsalted_success_stats(password, lookup_time)
-                return True
-        
-        self.print_failure_stats(total_attempts, start_time)
-        return False
-
-    def print_unsalted_success_stats(self, password, time_taken):
-        print(f"\n\n{Fore.GREEN}Password found instantly in rainbow table!{Style.RESET_ALL}")
-        print(f"{Fore.GREEN}Password: {password}{Style.RESET_ALL}")
-        print(f"{Fore.GREEN}Time for lookup: {time_taken:.6f} seconds{Style.RESET_ALL}")
-
-    def print_salted_success_stats(self, password, attempts, start_time):
-        end_time = time.time()
-        print(f"\n\n{Fore.GREEN}Password found!{Style.RESET_ALL}")
-        print(f"{Fore.GREEN}Password: {password}{Style.RESET_ALL}")
-        print(f"{Fore.GREEN}Hashes computed: {attempts:,}{Style.RESET_ALL}")
-        print(f"{Fore.GREEN}Time taken: {end_time:.1f} seconds{Style.RESET_ALL}")
-        print(f"{Fore.YELLOW}2. We had to compute a new hash for each password + salt combination.{Style.RESET_ALL}")
+                    if hash_value_computed == target_hash:
+                        # Password found with salt: Use the base class's success reporting method
+                        return self.print_success_stats(password_candidate, attempts_made_salted, start_time)
+            except KeyboardInterrupt:
+                # Handle user interruption for salted attack
+                return self.print_interrupt_stats(attempts_made_salted, start_time)
+            
+            # If the loop finishes without finding the password (salted hash)
+            return self.print_failure_stats(attempts_made_salted, start_time)
+            
+        else: # Not using salt, direct lookup in the pre-computed table
+            attempts_for_lookup = 1 # A direct lookup is conceptually 1 attempt
+            try:
+                if target_hash in rainbow_table:
+                    password_found = rainbow_table[target_hash]
+                    # Password found unsalted: Use the base class's success reporting method
+                    return self.print_success_stats(password_found, attempts_for_lookup, start_time)
+                else:
+                    # Password not found in unsalted table
+                    return self.print_failure_stats(attempts_for_lookup, start_time)
+            except KeyboardInterrupt:
+                # Handle user interruption for unsalted lookup
+                return self.print_interrupt_stats(attempts_for_lookup, start_time)
 
     def generate_rainbow_table(self, max_length=4):
         rainbow_table = {}
