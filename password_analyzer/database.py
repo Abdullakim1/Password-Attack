@@ -61,12 +61,10 @@ class DatabaseManager:
 
         cursor = conn.cursor()
         try:
-            # Insert into benchmarks table
             sql_benchmark = "INSERT INTO benchmarks (timestamp) VALUES (FROM_UNIXTIME(%s))"
             cursor.execute(sql_benchmark, (benchmark_data['timestamp'],))
             benchmark_id = cursor.lastrowid
 
-            # Insert into benchmark_results table
             sql_results = """
             INSERT INTO benchmark_results (
                 benchmark_id, test_type, iterations, elapsed_time, rate_per_second,
@@ -106,9 +104,7 @@ class DatabaseManager:
             print(f"{Fore.RED}Database connection error: {err}{Style.RESET_ALL}")
             return None
     
-    # ---------------- Retrieval helpers ----------------
     def fetch_crack_results(self):
-        """Return a list of dicts for all crack_results rows ordered by newest first."""
         conn = self.get_connection()
         if not conn:
             return []
@@ -163,19 +159,16 @@ class DatabaseManager:
             conn.close()
 
     def fetch_benchmark_reports(self):
-        """Reconstruct benchmark reports similar to the JSON structure used previously."""
         conn = self.get_connection()
         if not conn:
             return []
         cursor = conn.cursor(dictionary=True)
         try:
-            # Get benchmarks
             cursor.execute("SELECT id, timestamp FROM benchmarks ORDER BY timestamp DESC")
             benchmarks = cursor.fetchall()
             reports = []
             for bench in benchmarks:
                 bench_id = bench['id']
-                # fetch benchmark results
                 cursor.execute("SELECT * FROM benchmark_results WHERE benchmark_id=%s", (bench_id,))
                 results = cursor.fetchall()
                 report = {
@@ -231,7 +224,6 @@ class DatabaseManager:
         return hash_value, salt
 
     def delete_crack_result(self, result_id):
-        """Deletes a crack result from the database."""
         conn = self.get_connection()
         if not conn:
             return False
@@ -250,15 +242,12 @@ class DatabaseManager:
             conn.close()
 
     def delete_benchmark_report(self, benchmark_id):
-        """Deletes a benchmark report and its associated results from the database."""
         conn = self.get_connection()
         if not conn:
             return False
         cursor = conn.cursor()
         try:
-            # Delete associated benchmark_results first
             cursor.execute("DELETE FROM benchmark_results WHERE benchmark_id = %s", (benchmark_id,))
-            # Then delete the benchmark report
             cursor.execute("DELETE FROM benchmarks WHERE id = %s", (benchmark_id,))
             conn.commit()
             print(f"{Fore.GREEN}Benchmark report with ID {benchmark_id} and its results deleted successfully.{Style.RESET_ALL}")

@@ -76,9 +76,7 @@ class BruteForceAttack(PasswordAttack):
     def __init__(self, hash_verifier, max_time=None):
         super().__init__(hash_verifier)
         self.max_time = max_time
-        # Always use the full character set
         self.charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:,.<>?/'
 
     def execute(self, target_hash, **kwargs):
-        # Implement the brute force logic using self.charset and self.max_time
         pass

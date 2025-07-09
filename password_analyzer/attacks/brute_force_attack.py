@@ -1,8 +1,3 @@
-"""
-Brute force attack module for password analyzer.
-Implements exhaustive password cracking by trying all possible combinations.
-"""
-
 import time
 import string
 import itertools
@@ -40,9 +35,8 @@ class BruteForceAttack(PasswordAttack):
             print(f"{Fore.RED}No character set selected. Aborting brute force attack.{Style.RESET_ALL}")
             return False, None, 0, 0
 
-        # Ensure max_length is within reasonable bounds
         max_length = min(max(1, max_length), 10)  # Max length from HTML is 10
-        min_length = min(max(1, min_length), max_length) # Ensure min_length <= max_length
+        min_length = min(max(1, min_length), max_length) # Ensures min_length <= max_length
         
         start_time = time.time()
         attempts = 0

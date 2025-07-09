@@ -174,7 +174,6 @@ function deleteRecord(recordType, recordId) {
         .then(data => {
             if (data.success) {
                 alert('Record deleted successfully!');
-                // Reload the page to reflect changes
                 window.location.reload();
             } else {
                 alert('Error deleting record: ' + data.message);

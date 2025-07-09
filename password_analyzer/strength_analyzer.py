@@ -35,13 +35,11 @@ class PasswordStrengthAnalyzer:
         }
     
     def calculate_entropy(self, password):
-        """Calculate password entropy"""
         if not password:
             return 0
         
         charset_size = 0
         
-        # Check character sets used
         if re.search(r'[a-z]', password):
             charset_size += 26
         if re.search(r'[A-Z]', password):
@@ -58,7 +56,6 @@ class PasswordStrengthAnalyzer:
         return entropy
     
     def detect_patterns(self, password):
-        """Detect common password patterns"""
         detected = []
         
         for pattern_name, pattern in self.pattern_descriptions.items():
@@ -72,11 +69,9 @@ class PasswordStrengthAnalyzer:
         return detected
     
     def calculate_crack_time_estimate(self, password, attacks_per_second=1000000):
-        """Estimate time to crack password"""
         entropy = self.calculate_entropy(password)
         combinations = 2 ** entropy
         
-        # Average case: half the combinations
         average_attempts = combinations / 2
         
         seconds = average_attempts / attacks_per_second
@@ -93,7 +88,6 @@ class PasswordStrengthAnalyzer:
             return f"{seconds/31536000:.1f} years"
     
     def get_strength_rating(self, password):
-        """Get overall strength rating"""
         entropy = self.calculate_entropy(password)
         patterns = self.detect_patterns(password)
         
@@ -113,7 +107,6 @@ class PasswordStrengthAnalyzer:
             rating = "Very Strong"
             color = Fore.CYAN
         
-        # Penalize for patterns
         if patterns:
             if rating == "Very Strong":
                 rating = "Strong"
@@ -125,7 +118,6 @@ class PasswordStrengthAnalyzer:
         return rating, color
     
     def analyze_password(self, password):
-        """Complete password analysis"""
         entropy = self.calculate_entropy(password)
         patterns = self.detect_patterns(password)
         crack_time = self.calculate_crack_time_estimate(password)
@@ -144,7 +136,6 @@ class PasswordStrengthAnalyzer:
         return analysis
     
     def print_analysis(self, analysis):
-        """Print formatted analysis results"""
         print(f"\n{Fore.CYAN}=== Password Strength Analysis ==={Style.RESET_ALL}")
         print(f"Password: {analysis['password']}")
         print(f"Length: {analysis['length']} characters")

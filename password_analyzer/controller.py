@@ -90,11 +90,9 @@ class PasswordCrackingController:
         return attack.execute(target_hash, **kwargs)
     
     def analyze_password_strength(self, password):
-        """Analyze password strength before cracking"""
         return self.strength_analyzer.analyze_password(password)
     
     def save_attack_result(self, attack_type, username, target_hash, success, password, attempts, elapsed, use_salt=False):
-        """Save attack results to file"""
         rate = attempts / elapsed if elapsed > 0 else 0
         result = self.reporter.create_attack_result(
             attack_type, username, target_hash, success, password, attempts, elapsed, rate, use_salt
@@ -102,9 +100,7 @@ class PasswordCrackingController:
         return self.reporter.save_result(result)
     
     def run_benchmark(self):
-        """Run performance benchmark"""
         return self.benchmark.run_comprehensive_benchmark()
     
     def get_previous_results(self):
-        """Get previous analysis results"""
         return self.reporter.load_previous_results()

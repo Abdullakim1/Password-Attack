@@ -38,7 +38,6 @@
                         </select>
                     </div>
                     
-                    <!-- Brute Force Options -->
                     <div id="bruteForceOptions" class="attack-options" style="display: none;">
                         <div class="card mb-3">
                             <div class="card-header">Brute Force Settings</div>
@@ -80,7 +79,6 @@
                         </div>
                     </div>
                     
-                    <!-- Mask Attack Options -->
                     <div id="maskOptions" class="attack-options" style="display: none;">
                         <div class="card mb-3">
                             <div class="card-header">Mask Attack Settings</div>
@@ -100,7 +98,6 @@
                         </div>
                     </div>
                     
-                    <!-- Dictionary Options -->
                     <div id="dictionaryOptions" class="attack-options" style="display: none;">
                         <div class="card mb-3">
                             <div class="card-header">Dictionary Settings</div>
@@ -201,7 +198,7 @@ function updateEstimation() {
             totalCombinations += Math.pow(charset, len);
         }
         
-        const rate = 100000; // estimated attempts per second
+        const rate = 100000; 
         const timeSeconds = totalCombinations / rate;
         
         document.getElementById('combinations').textContent = totalCombinations.toLocaleString();
@@ -226,7 +223,6 @@ document.getElementById('mask_pattern').addEventListener('change', function() {
     }
 });
 
-// Add event listeners for estimation updates
 ['min_length', 'max_length', 'use_lowercase', 'use_uppercase', 'use_digits', 'use_symbols'].forEach(id => {
     document.getElementById(id).addEventListener('change', updateEstimation);
 });

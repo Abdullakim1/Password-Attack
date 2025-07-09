@@ -13,7 +13,6 @@ from .benchmark import PerformanceBenchmark
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
-# Initialize components
 controller = PasswordCrackingController()
 strength_analyzer = PasswordStrengthAnalyzer()
 reporter = ResultsReporter()
@@ -21,17 +20,14 @@ benchmark = PerformanceBenchmark()
 
 @app.route('/')
 def index():
-    """Main dashboard"""
     return render_template('index.html')
 
 @app.route('/login')
 def login_page():
-    """Login and registration page"""
     return render_template('login.html')
 
 @app.route('/api/login', methods=['POST'])
 def api_login():
-    """API endpoint for user login"""
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '')
     
@@ -64,7 +60,6 @@ def api_login():
 
 @app.route('/api/register', methods=['POST'])
 def api_register():
-    """API endpoint for user registration"""
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '')
     
@@ -88,7 +83,6 @@ def api_register():
 
 @app.route('/api/reset', methods=['POST'])
 def api_reset():
-    """API endpoint for account reset"""
     username = request.form.get('username', '').strip()
     
     if not username:
@@ -105,7 +99,6 @@ def api_reset():
 
 @app.route('/analyze', methods=['GET', 'POST'])
 def analyze_password():
-    """Password strength analysis page"""
     if request.method == 'POST':
         password = request.form.get('password', '')
         if password:
@@ -118,7 +111,6 @@ def analyze_password():
 
 @app.route('/api/analyze', methods=['POST'])
 def api_analyze():
-    """API endpoint for password analysis"""
     data = request.get_json()
     password = data.get('password', '')
     
@@ -126,20 +118,17 @@ def api_analyze():
         return jsonify({'error': 'Password is required'}), 400
     
     analysis = strength_analyzer.analyze_password(password)
-    # Remove color codes for JSON response
     analysis.pop('color', None)
     
     return jsonify(analysis)
 
 @app.route('/crack')
 def crack_password():
-    """Password cracking interface"""
     users = controller.db_manager.get_users()
     return render_template('crack.html', users=users)
 
 @app.route('/crack/execute', methods=['POST'])
 def execute_crack():
-    """Execute password cracking attack"""
     attack_type = request.form.get('attack_type')
     username = request.form.get('username')
     use_salt = request.form.get('use_salt') == 'on'
@@ -147,17 +136,14 @@ def execute_crack():
     if not username:
         return jsonify({'error': 'Username is required'}), 400
     
-    # Get target hash
     hash_value, salt = controller.db_manager.get_user_hash(username, use_salt)
     
     if not hash_value:
         return jsonify({'error': 'User not found or hash not available'}), 404
     
-    # Configure hash verifier
     controller.hash_verifier.using_salt = use_salt
     controller.hash_verifier.current_salt = salt
     
-    # Prepare parameters for attack
     attack_params = {}
     if attack_type == 'brute_force':
         attack_params['min_length'] = int(request.form.get('min_length', 1))
@@ -173,13 +159,9 @@ def execute_crack():
         if mask_pattern_choice == 'custom':
             attack_params['custom_mask'] = request.form.get('custom_mask')
     elif attack_type == 'dictionary':
-        # The dictionary attack (dictionary_attack.py) does not currently take wordlist type as parameter in `execute`
-        # It calls self.wordlist_manager.download_wordlists() and load_wordlists() internally.
-        # So no specific parameter needs to be passed to `execute` for now.
         pass
 
 
-    # Execute attack
     try:
         if attack_type == 'dictionary':
             success, password, attempts, elapsed = controller.run_dictionary_attack(hash_value, **attack_params)
@@ -196,13 +178,11 @@ def execute_crack():
         else:
             return jsonify({'error': 'Invalid attack type'}), 400
         
-        # Create result
         result = reporter.create_attack_result(
             attack_type, username, hash_value, success, password, 
             attempts, elapsed, attempts/elapsed if elapsed > 0 else 0, use_salt
         )
         
-        # Save result
         filename = reporter.save_result(result)
         
         return jsonify({
@@ -220,20 +200,16 @@ def execute_crack():
 
 @app.route('/benchmark')
 def benchmark_page():
-    """Benchmark page"""
     return render_template('benchmark.html')
 
 @app.route('/benchmark/run', methods=['POST'])
 def run_benchmark():
-    """Run performance benchmark"""
     try:
-        # Get test passwords from form
         test_passwords_text = request.form.get('test_passwords', 'password\\n123456\\nadmin\\ntest')
         test_passwords = [pwd.strip() for pwd in test_passwords_text.split('\\n') if pwd.strip()]
         
         max_time = int(request.form.get('max_time', 30))
         
-        # Create benchmark with test passwords
         benchmark_instance = PerformanceBenchmark()
         benchmark_instance.test_passwords = test_passwords
         
@@ -245,12 +221,10 @@ def run_benchmark():
         if not report:
             return jsonify({'error': 'Failed to generate benchmark report'}), 500
         
-        # Save benchmark results
         filename = reporter.save_benchmark_results(report)
         if not filename:
             return jsonify({'error': 'Failed to save benchmark results'}), 500
         
-        # Format results for frontend display
         formatted_results = {}
         for result in results:
             test_type = result.get('test_type', 'unknown')
@@ -263,7 +237,6 @@ def run_benchmark():
                 }
             formatted_results[test_type]['tests'].append(result)
         
-        # Calculate averages
         for test_type, data in formatted_results.items():
             tests = data['tests']
             if tests:
@@ -286,9 +259,7 @@ def run_benchmark():
 
 @app.route('/results')
 def results_page():
-    """Results and reports page"""
     previous_results = reporter.load_previous_results()
-    # Filter only attack results for the results table
     attack_results = []
     benchmark_files = []
     
@@ -296,12 +267,9 @@ def results_page():
         data = result['data']
         filename = result['filename']
         
-        # Check if this is a benchmark file
         if filename.startswith(('benchmark_', 'database_benchmark_')):
             benchmark_files.append({'filename': filename, 'data': data})
-        # Check if this is an attack result with required fields
         elif isinstance(data, dict) and 'attack_type' in data:
-            # Add filename to the data for download links
             data['filename'] = filename
             attack_results.append(data)
     
@@ -309,7 +277,6 @@ def results_page():
 
 @app.route('/results/delete/<record_type>/<record_id>', methods=['POST'])
 def delete_result(record_type, record_id):
-    """API endpoint to delete a crack result or benchmark report."""
     try:
         if record_type == 'crack_result':
             success = controller.db_manager.delete_crack_result(record_id)
@@ -332,9 +299,6 @@ def delete_result(record_type, record_id):
 
 @app.route('/download/<filename>')
 def download_result(filename):
-    """Download result file"""
-    # Use absolute path to ensure correct file location
-    # If filename corresponds to database entries, generate JSON on the fly
     if filename.startswith('database_crack_'):
         result_id = filename.split('_')[-1]
         row = controller.db_manager.fetch_crack_result_by_id(result_id)
@@ -353,14 +317,12 @@ def download_result(filename):
         with open(temp_path, 'w') as f:
             json.dump(report, f, indent=2, default=str)
         return send_file(temp_path, as_attachment=True)
-    # Legacy file path
     filepath = os.path.abspath(os.path.join(reporter.results_dir, filename))
     if os.path.exists(filepath):
         return send_file(filepath, as_attachment=True)
     return f"File not found: {filename}", 404
 
 def run_web_interface():
-    """Run the web interface"""
     app.run(host='0.0.0.0', port=5000, debug=False)
 
 if __name__ == '__main__':

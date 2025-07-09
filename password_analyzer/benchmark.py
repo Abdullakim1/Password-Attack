@@ -24,14 +24,11 @@ class PerformanceBenchmark:
         self.benchmark_results = []
     
     def create_test_hashes(self):
-        """Create test hashes for benchmarking"""
         test_hashes = {}
         
         for password in self.test_passwords:
-            # Unsalted hash
             hash_unsalted = hashlib.sha256(password.encode()).hexdigest()
             
-            # Salted hash
             salt = "test_salt_123"
             salted = password + salt
             hash_salted = hashlib.sha256(salted.encode()).hexdigest()
@@ -45,14 +42,11 @@ class PerformanceBenchmark:
         return test_hashes
     
     def benchmark_dictionary_attack(self, target_password, max_attempts=10000):
-        """Benchmark dictionary attack performance"""
         print(f"\n{Fore.YELLOW}Benchmarking dictionary attack...{Style.RESET_ALL}")
         
-        # Create hash verifier
         hash_verifier = HashVerifier()
         target_hash = hashlib.sha256(target_password.encode()).hexdigest()
         
-        # Create attack instance
         attack = DictionaryAttack(hash_verifier)
         
         start_time = time.time()
@@ -71,20 +65,15 @@ class PerformanceBenchmark:
         return result
     
     def benchmark_brute_force_attack(self, target_password, max_length=6, max_time=None):
-        """Benchmark brute force attack performance with max time"""
         print(f"\n{Fore.YELLOW}Benchmarking brute force attack...{Style.RESET_ALL}")
-        
-        # Removed the condition: if len(target_password) > max_length:
-        # The brute force attack will now only be limited by max_time.
         
         hash_verifier = HashVerifier()
         target_hash = hashlib.sha256(target_password.encode()).hexdigest()
         
-        # Pass max_time to the BruteForceAttack constructor
         attack = BruteForceAttack(hash_verifier, max_time=max_time)
         
         start_time = time.time()
-        success, found_password, attempts, elapsed = attack.execute(target_hash, max_time=max_time) # Pass max_time to execute
+        success, found_password, attempts, elapsed = attack.execute(target_hash, max_time=max_time)
         
         result = {
             'test_type': 'brute_force_attack',
@@ -99,7 +88,6 @@ class PerformanceBenchmark:
         return result
     
     def benchmark_hybrid_attack(self, target_password):
-        """Benchmark hybrid attack performance"""
         print(f"\n{Fore.YELLOW}Benchmarking hybrid attack...{Style.RESET_ALL}")
         
         hash_verifier = HashVerifier()
@@ -123,7 +111,6 @@ class PerformanceBenchmark:
         return result
 
     def benchmark_mask_attack(self, target_password, mask_pattern_choice="?l?l?l?l"):
-        """Benchmark mask attack performance."""
         print(f"\n{Fore.YELLOW}Benchmarking mask attack...{Style.RESET_ALL}")
         
         hash_verifier = HashVerifier()
@@ -149,7 +136,6 @@ class PerformanceBenchmark:
         return result
 
     def benchmark_rule_based_attack(self, target_password):
-        """Benchmark rule-based attack performance."""
         print(f"\n{Fore.YELLOW}Benchmarking rule-based attack...{Style.RESET_ALL}")
         
         hash_verifier = HashVerifier()
@@ -173,7 +159,6 @@ class PerformanceBenchmark:
         return result
 
     def benchmark_rainbow_table_attack(self, target_password):
-        """Benchmark rainbow table attack performance."""
         print(f"\n{Fore.YELLOW}Benchmarking rainbow table attack...{Style.RESET_ALL}")
         
         hash_verifier = HashVerifier()
@@ -197,16 +182,13 @@ class PerformanceBenchmark:
         return result
 
     def run_comprehensive_benchmark(self):
-        """Run comprehensive benchmark of all attack methods"""
         print(f"\n{Fore.CYAN}=== Comprehensive Performance Benchmark ==={Style.RESET_ALL}")
         
         results = []
         
-        # Test passwords with different attacks
         for password in self.test_passwords:
             print(f"\n{Fore.BLUE}Testing password: {password}{Style.RESET_ALL}")
             
-            # Dictionary attack
             try:
                 dict_result = self.benchmark_dictionary_attack(password)
                 if dict_result:
@@ -215,12 +197,7 @@ class PerformanceBenchmark:
                 print(f"{Fore.RED}Dictionary attack failed: {e}{Style.RESET_ALL}")
                 logging.error(f"Dictionary attack failed for {password}: {e}")
             
-            # Brute force attack
             try:
-                # Pass max_time from the web interface if available, otherwise use a default
-                # The max_time here should ideally come from the form submission in benchmark.html
-                # For this example, let's assume a default if not explicitly passed.
-                # In a real scenario, this would be passed from the web_interface.py's run_benchmark function.
                 bf_result = self.benchmark_brute_force_attack(password, max_time=self.max_time_per_test if hasattr(self, 'max_time_per_test') else 60)
                 if bf_result:
                     results.append(bf_result)
@@ -228,7 +205,6 @@ class PerformanceBenchmark:
                 print(f"{Fore.RED}Brute force attack failed: {e}{Style.RESET_ALL}")
                 logging.error(f"Brute force attack failed for {password}: {e}")
             
-            # Hybrid attack
             try:
                 hybrid_result = self.benchmark_hybrid_attack(password)
                 if hybrid_result:
@@ -237,7 +213,6 @@ class PerformanceBenchmark:
                 print(f"{Fore.RED}Hybrid attack failed: {e}{Style.RESET_ALL}")
                 logging.error(f"Hybrid attack failed for {password}: {e}")
             
-            # Add Mask attack
             try:
                 mask_result = self.benchmark_mask_attack(password)
                 if mask_result:
@@ -246,7 +221,6 @@ class PerformanceBenchmark:
                 print(f"{Fore.RED}Mask attack failed: {e}{Style.RESET_ALL}")
                 logging.error(f"Mask attack failed for {password}: {e}")
 
-            # Add Rule-Based attack
             try:
                 rule_based_result = self.benchmark_rule_based_attack(password)
                 if rule_based_result:
@@ -255,7 +229,6 @@ class PerformanceBenchmark:
                 print(f"{Fore.RED}Rule-based attack failed: {e}{Style.RESET_ALL}")
                 logging.error(f"Rule-based attack failed for {password}: {e}")
 
-            # Add Rainbow Table attack
             try:
                 rainbow_table_result = self.benchmark_rainbow_table_attack(password)
                 if rainbow_table_result:
@@ -267,7 +240,6 @@ class PerformanceBenchmark:
         return results
     
     def generate_benchmark_report(self, results):
-        """Generate detailed benchmark report"""
         print(f"\n{Fore.CYAN}=== Benchmark Report ==={Style.RESET_ALL}")
         
         if not results:
@@ -280,7 +252,6 @@ class PerformanceBenchmark:
             }
         
         try:
-            # Group results by test type
             grouped = {}
             for result in results:
                 test_type = result.get('test_type', 'unknown')
@@ -288,7 +259,6 @@ class PerformanceBenchmark:
                     grouped[test_type] = []
                 grouped[test_type].append(result)
             
-            # Generate report for each test type
             for test_type, test_results in grouped.items():
                 print(f"\n{Fore.YELLOW}{test_type.upper()} RESULTS:{Style.RESET_ALL}")
                 

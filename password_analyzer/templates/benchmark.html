@@ -86,7 +86,6 @@ document.getElementById('benchmarkForm').addEventListener('submit', function(e) 
     progressDiv.style.display = 'block';
     resultsContent.innerHTML = '';
     
-    // Show progress
     let progress = 0;
     const progressBar = document.querySelector('.progress-bar');
     const progressText = document.getElementById('progressText');
@@ -140,7 +139,6 @@ function displayBenchmarkResults(data) {
     
     let html = '<div class="row">';
     
-    // Summary cards
     html += '<div class="col-md-12 mb-4">';
     html += '<h6>Benchmark Summary</h6>';
     html += '<div class="row">';
@@ -179,7 +177,6 @@ function displayBenchmarkResults(data) {
     
     html += '</div></div>';
     
-    // Detailed results table
     html += '<div class="col-md-12">';
     html += '<h6>Detailed Results</h6>';
     html += '<div class="table-responsive">';

@@ -55,19 +55,16 @@ def password_cracker_menu():
                 controller.run_rainbow_table_attack(target_hash)
                 
         elif choice == '7':
-            # Password strength analysis
             password = input(f"{Fore.YELLOW}Enter password to analyze: {Style.RESET_ALL}")
             if password:
                 analysis = controller.analyze_password_strength(password)
                 controller.strength_analyzer.print_analysis(analysis)
                 
         elif choice == '8':
-            # View previous results
             results = controller.get_previous_results()
             controller.reporter.display_results_summary(results)
             
         elif choice == '9':
-            # Run benchmark
             print(f"{Fore.YELLOW}Running performance benchmark...{Style.RESET_ALL}")
             results = controller.run_benchmark()
             report = controller.benchmark.generate_benchmark_report(results)
@@ -75,7 +72,6 @@ def password_cracker_menu():
             print(f"{Fore.GREEN}Benchmark completed and saved to {filename}{Style.RESET_ALL}")
             
         elif choice == '10':
-            # Start web interface
             print(f"{Fore.CYAN}Starting web interface...{Style.RESET_ALL}")
             print(f"Access the web interface at: http://localhost:5000")
             from .web_interface import run_web_interface
