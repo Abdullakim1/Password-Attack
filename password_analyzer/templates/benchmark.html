@@ -15,6 +15,14 @@
             <div class="card-body">
                 <h5 class="card-title">Run Benchmark</h5>
                 <p>This will test all attack methods against various password complexities.</p>
+                <div class="mb-3">
+                    <label for="customPassword" class="form-label">Custom Password</label>
+                    <input type="password" class="form-control" id="customPassword" placeholder="Enter password to test">
+                </div>
+                <div class="mb-3">
+                    <label for="maxTime" class="form-label">Max Time (seconds)</label>
+                    <input type="number" class="form-control" id="maxTime" placeholder="Enter maximum time">
+                </div>
                 <button id="runBenchmark" class="btn btn-info">Start Benchmark</button>
             </div>
         </div>
@@ -51,6 +59,8 @@ document.getElementById('runBenchmark').addEventListener('click', function() {
     const button = this;
     const resultsSection = document.getElementById('benchmarkResults');
     const resultsContent = document.getElementById('resultsContent');
+    const customPassword = document.getElementById('customPassword').value;
+    const maxTime = document.getElementById('maxTime').value;
     
     button.disabled = true;
     button.textContent = 'Running Benchmark...';
@@ -58,7 +68,11 @@ document.getElementById('runBenchmark').addEventListener('click', function() {
     resultsSection.style.display = 'block';
     
     fetch('/benchmark/run', {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password: customPassword, max_time: maxTime })
     })
     .then(response => response.json())
     .then(data => {

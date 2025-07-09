@@ -7,6 +7,7 @@ Benchmarks different attack methods and generates performance reports.
 import time
 import hashlib
 import statistics
+import logging
 from colorama import Fore, Style
 from .base import HashVerifier
 from .attacks.dictionary_attack import DictionaryAttack
@@ -15,18 +16,9 @@ from .attacks.hybrid_attack import HybridAttack
 
 class PerformanceBenchmark:
     
-    def __init__(self):
-        self.test_passwords = [
-            "123456",
-            "password",
-            "hello123",
-            "admin2024",
-            "Test123!",
-            "MyPassword1",
-            "SecurePass123",
-            "ComplexPassword1!"
-        ]
-        
+    def __init__(self, target_password=None):
+        self.target_password = target_password
+        self.test_passwords = [target_password] if target_password else []
         self.benchmark_results = []
     
     def create_test_hashes(self):
@@ -49,32 +41,6 @@ class PerformanceBenchmark:
             }
         
         return test_hashes
-    
-    def benchmark_hash_verification(self, iterations=100000):
-        """Benchmark hash verification performance"""
-        print(f"\n{Fore.YELLOW}Benchmarking hash verification...{Style.RESET_ALL}")
-        
-        hash_verifier = HashVerifier()
-        test_password = "testpassword"
-        test_hash = hashlib.sha256(test_password.encode()).hexdigest()
-        
-        start_time = time.time()
-        
-        for _ in range(iterations):
-            hash_verifier.verify(test_password, test_hash)
-        
-        elapsed = time.time() - start_time
-        rate = iterations / elapsed
-        
-        result = {
-            'test_type': 'hash_verification',
-            'iterations': iterations,
-            'elapsed_time': elapsed,
-            'rate_per_second': rate
-        }
-        
-        print(f"Hash verification rate: {rate:,.0f} hashes/second")
-        return result
     
     def benchmark_dictionary_attack(self, target_password, max_attempts=10000):
         """Benchmark dictionary attack performance"""
@@ -102,8 +68,8 @@ class PerformanceBenchmark:
         
         return result
     
-    def benchmark_brute_force_attack(self, target_password, charset_size=36, max_length=6):
-        """Benchmark brute force attack performance"""
+    def benchmark_brute_force_attack(self, target_password, max_length=6, max_time=None):
+        """Benchmark brute force attack performance with max time"""
         print(f"\n{Fore.YELLOW}Benchmarking brute force attack...{Style.RESET_ALL}")
         
         if len(target_password) > max_length:
@@ -113,7 +79,7 @@ class PerformanceBenchmark:
         hash_verifier = HashVerifier()
         target_hash = hashlib.sha256(target_password.encode()).hexdigest()
         
-        attack = BruteForceAttack(hash_verifier)
+        attack = BruteForceAttack(hash_verifier, max_time=max_time)
         
         start_time = time.time()
         success, found_password, attempts, elapsed = attack.execute(target_hash)
@@ -130,20 +96,38 @@ class PerformanceBenchmark:
         
         return result
     
+    def benchmark_hybrid_attack(self, target_password):
+        """Benchmark hybrid attack performance"""
+        print(f"\n{Fore.YELLOW}Benchmarking hybrid attack...{Style.RESET_ALL}")
+        
+        hash_verifier = HashVerifier()
+        target_hash = hashlib.sha256(target_password.encode()).hexdigest()
+        
+        attack = HybridAttack(hash_verifier)
+        
+        start_time = time.time()
+        success, found_password, attempts, elapsed = attack.execute(target_hash)
+        
+        result = {
+            'test_type': 'hybrid_attack',
+            'target_password': target_password,
+            'success': success,
+            'found_password': found_password,
+            'attempts': attempts,
+            'elapsed_time': elapsed,
+            'rate_per_second': attempts / elapsed if elapsed > 0 else 0
+        }
+        
+        return result
+    
     def run_comprehensive_benchmark(self):
         """Run comprehensive benchmark of all attack methods"""
         print(f"\n{Fore.CYAN}=== Comprehensive Performance Benchmark ==={Style.RESET_ALL}")
         
         results = []
         
-        # Hash verification benchmark
-        hash_result = self.benchmark_hash_verification()
-        results.append(hash_result)
-        
-        # Test simple passwords with different attacks
-        simple_passwords = ["123456", "password", "admin"]
-        
-        for password in simple_passwords:
+        # Test passwords with different attacks
+        for password in self.test_passwords:
             print(f"\n{Fore.BLUE}Testing password: {password}{Style.RESET_ALL}")
             
             # Dictionary attack
@@ -153,15 +137,25 @@ class PerformanceBenchmark:
                     results.append(dict_result)
             except Exception as e:
                 print(f"{Fore.RED}Dictionary attack failed: {e}{Style.RESET_ALL}")
+                logging.error(f"Dictionary attack failed for {password}: {e}")
             
-            # Brute force for very short passwords only
-            if len(password) <= 4:
-                try:
-                    bf_result = self.benchmark_brute_force_attack(password)
-                    if bf_result:
-                        results.append(bf_result)
-                except Exception as e:
-                    print(f"{Fore.RED}Brute force attack failed: {e}{Style.RESET_ALL}")
+            # Brute force attack
+            try:
+                bf_result = self.benchmark_brute_force_attack(password)
+                if bf_result:
+                    results.append(bf_result)
+            except Exception as e:
+                print(f"{Fore.RED}Brute force attack failed: {e}{Style.RESET_ALL}")
+                logging.error(f"Brute force attack failed for {password}: {e}")
+            
+            # Hybrid attack
+            try:
+                hybrid_result = self.benchmark_hybrid_attack(password)
+                if hybrid_result:
+                    results.append(hybrid_result)
+            except Exception as e:
+                print(f"{Fore.RED}Hybrid attack failed: {e}{Style.RESET_ALL}")
+                logging.error(f"Hybrid attack failed for {password}: {e}")
         
         return results
     
