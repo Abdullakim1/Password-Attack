@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block content %}
@@ -57,7 +56,10 @@
                                 <td>{{ "%.0f"|format(result.get('rate_per_second', 0)) }}</td>
                                 <td>
                                     {% if result.get('filename') %}
-                                        <a href="{{ url_for('download_result', filename=result.get('filename')) }}" class="btn btn-sm btn-outline-primary">Download</a>
+                                        <a href="{{ url_for('download_result', filename=result.get('filename')) }}" class="btn btn-sm btn-outline-primary mb-1">Download</a>
+                                        {% if result.get('filename').startswith('database_crack_') %}
+                                            <button class="btn btn-sm btn-outline-danger" onclick="deleteRecord('crack_result', '{{ result.get('filename').split('_')[-1] }}')">Delete</button>
+                                        {% endif %}
                                     {% endif %}
                                 </td>
                             </tr>
@@ -131,7 +133,10 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('download_result', filename=benchmark.filename) }}" class="btn btn-sm btn-outline-primary">Download</a>
+                                    <a href="{{ url_for('download_result', filename=benchmark.filename) }}" class="btn btn-sm btn-outline-primary mb-1">Download</a>
+                                    {% if benchmark.filename.startswith('database_benchmark_') %}
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteRecord('benchmark_report', '{{ benchmark.filename.split('_')[-1] }}')">Delete</button>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}
@@ -153,4 +158,33 @@
     </div>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function deleteRecord(recordType, recordId) {
+    if (confirm('Are you sure you want to delete this record?')) {
+        fetch(`/results/delete/${recordType}/${recordId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Record deleted successfully!');
+                // Reload the page to reflect changes
+                window.location.reload();
+            } else {
+                alert('Error deleting record: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the record.');
+        });
+    }
+}
+</script>
 {% endblock %}

@@ -229,3 +229,44 @@ class DatabaseManager:
         conn.close()
         
         return hash_value, salt
+
+    def delete_crack_result(self, result_id):
+        """Deletes a crack result from the database."""
+        conn = self.get_connection()
+        if not conn:
+            return False
+        cursor = conn.cursor()
+        try:
+            cursor.execute("DELETE FROM crack_results WHERE id = %s", (result_id,))
+            conn.commit()
+            print(f"{Fore.GREEN}Crack result with ID {result_id} deleted successfully.{Style.RESET_ALL}")
+            return True
+        except mysql.connector.Error as err:
+            print(f"{Fore.RED}Error deleting crack result: {err}{Style.RESET_ALL}")
+            conn.rollback()
+            return False
+        finally:
+            cursor.close()
+            conn.close()
+
+    def delete_benchmark_report(self, benchmark_id):
+        """Deletes a benchmark report and its associated results from the database."""
+        conn = self.get_connection()
+        if not conn:
+            return False
+        cursor = conn.cursor()
+        try:
+            # Delete associated benchmark_results first
+            cursor.execute("DELETE FROM benchmark_results WHERE benchmark_id = %s", (benchmark_id,))
+            # Then delete the benchmark report
+            cursor.execute("DELETE FROM benchmarks WHERE id = %s", (benchmark_id,))
+            conn.commit()
+            print(f"{Fore.GREEN}Benchmark report with ID {benchmark_id} and its results deleted successfully.{Style.RESET_ALL}")
+            return True
+        except mysql.connector.Error as err:
+            print(f"{Fore.RED}Error deleting benchmark report: {err}{Style.RESET_ALL}")
+            conn.rollback()
+            return False
+        finally:
+            cursor.close()
+            conn.close()

@@ -228,8 +228,8 @@ def run_benchmark():
     """Run performance benchmark"""
     try:
         # Get test passwords from form
-        test_passwords_text = request.form.get('test_passwords', 'password\n123456\nadmin\ntest')
-        test_passwords = [pwd.strip() for pwd in test_passwords_text.split('\n') if pwd.strip()]
+        test_passwords_text = request.form.get('test_passwords', 'password\\n123456\\nadmin\\ntest')
+        test_passwords = [pwd.strip() for pwd in test_passwords_text.split('\\n') if pwd.strip()]
         
         max_time = int(request.form.get('max_time', 30))
         
@@ -306,6 +306,29 @@ def results_page():
             attack_results.append(data)
     
     return render_template('results.html', results=attack_results, benchmarks=benchmark_files)
+
+@app.route('/results/delete/<record_type>/<record_id>', methods=['POST'])
+def delete_result(record_type, record_id):
+    """API endpoint to delete a crack result or benchmark report."""
+    try:
+        if record_type == 'crack_result':
+            success = controller.db_manager.delete_crack_result(record_id)
+            if success:
+                return jsonify({'success': True, 'message': 'Crack result deleted successfully.'})
+            else:
+                return jsonify({'success': False, 'message': 'Failed to delete crack result.'}), 500
+        elif record_type == 'benchmark_report':
+            success = controller.db_manager.delete_benchmark_report(record_id)
+            if success:
+                return jsonify({'success': True, 'message': 'Benchmark report deleted successfully.'})
+            else:
+                return jsonify({'success': False, 'message': 'Failed to delete benchmark report.'}), 500
+        else:
+            return jsonify({'success': False, 'message': 'Invalid record type.'}), 400
+    except Exception as e:
+        app.logger.error(f"Error deleting record: {str(e)}")
+        return jsonify({'success': False, 'message': f'An error occurred: {str(e)}'}), 500
+
 
 @app.route('/download/<filename>')
 def download_result(filename):
