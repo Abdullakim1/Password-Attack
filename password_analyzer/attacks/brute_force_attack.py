@@ -35,7 +35,7 @@ class BruteForceAttack(PasswordAttack):
             print(f"{Fore.RED}No character set selected. Aborting brute force attack.{Style.RESET_ALL}")
             return False, None, 0, 0
 
-        max_length = min(max(1, max_length), 10)  # Max length from HTML is 10
+        max_length = min(max(1, max_length), 8)  # Max length from HTML
         min_length = min(max(1, min_length), max_length) # Ensures min_length <= max_length
         
         start_time = time.time()
