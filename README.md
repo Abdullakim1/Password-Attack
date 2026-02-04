@@ -1,5 +1,3 @@
-
-```markdown
 # 🔐 Password Security Analysis Tool
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
@@ -13,6 +11,7 @@ A comprehensive cybersecurity simulation tool designed to demonstrate the effica
 > *Note: This simulation runs in a controlled environment for educational analysis.*
 
 ![Password Attack Demo](media/demo.gif)
+
 *(If the GIF doesn't load, please check the `media/` folder)*
 
 ## 📂 Project Architecture
@@ -20,13 +19,17 @@ A comprehensive cybersecurity simulation tool designed to demonstrate the effica
 This tool is split into two distinct modules representing **Defense** (Blue Team) and **Offense** (Red Team):
 
 ### 1. The Defense: Secure Login System (`login_system.py`)
+
 A production-grade authentication module implementing industry best practices:
+
 * **Cryptographic Hashing:** Uses SHA-256 with unique per-user salts to neutralize Rainbow Table attacks.
 * **Brute Force Mitigation:** Implements an exponential backoff and account lockout mechanism (3 failed attempts).
 * **Persistence:** Securely stores credentials in a MySQL database.
 
 ### 2. The Offense: Attack Vectors (`password_analyzer.py`)
+
 A benchmarking tool that simulates real-world attack strategies:
+
 * **Dictionary Attack:** Utilizes standard wordlists (e.g., `rockyou.txt` subsets).
 * **Brute Force:** Exhaustive key search for short/simple passwords.
 * **Hybrid Attack:** Combines dictionary words with common suffix patterns (e.g., "password123").
@@ -38,44 +41,40 @@ A benchmarking tool that simulates real-world attack strategies:
 ## 🛠️ Setup & Installation
 
 ### Prerequisites
+
 * Python 3.8+
 * MySQL Server
 * `pip` package manager
 
 ### 1. Database Configuration
-Access your MySQL instance and set up the environment:
 
+Access your MySQL instance and set up the environment:
 ```sql
 CREATE DATABASE security;
 CREATE USER 'luxury_user'@'localhost' IDENTIFIED BY 'luxury123';
 GRANT ALL PRIVILEGES ON security.* TO 'luxury_user'@'localhost';
 FLUSH PRIVILEGES;
-
 ```
 
 ### 2. Install Dependencies
-
 ```bash
 pip install mysql-connector-python colorama
-
 ```
 
 ### 3. Usage
 
 **Step 1: Initialize the System**
-First, run the login system to register a user. This populates the database with a salted hash.
 
+First, run the login system to register a user. This populates the database with a salted hash.
 ```bash
 python login_system.py
-
 ```
 
 **Step 2: Run the Analyzer**
-Launch the attack simulation to test the strength of the stored passwords.
 
+Launch the attack simulation to test the strength of the stored passwords.
 ```bash
 python password_analyzer.py
-
 ```
 
 ---
@@ -92,8 +91,7 @@ The core of this project compares the computational cost of attacking **Unsalted
 | **UI** | Colorama | Provides real-time visual feedback on attack progress. |
 
 ### Code Structure
-
-```bash
+```
 ├── login_system.py       # Authentication & Registration logic
 ├── password_analyzer.py  # Attack simulation engine
 ├── wordlists/           # Directory for dictionary files
@@ -101,18 +99,14 @@ The core of this project compares the computational cost of attacking **Unsalted
 ├── media/               # Demo assets
 │   └── demo.gif
 └── README.md
-
 ```
 
 ## ⚠️ Ethical Disclaimer
 
 **This tool is strictly for educational purposes and security analysis.**
+
 It is designed to help developers understand the importance of secure password storage and the mechanics of common vulnerabilities. Do not use this tool against systems you do not own or have explicit permission to test.
 
 ---
 
-*Developed by [Abdullakim Zamirbek uulu*](https://github.com/Abdullakim1)
-
-```
-
-```
+*Developed by [Abdullakim Zamirbek uulu](https://github.com/Abdullakim1)*
