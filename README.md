@@ -8,7 +8,7 @@ A comprehensive cybersecurity simulation tool designed to demonstrate the effica
 
 ## ⚡ Demo
 
-> *Note: This simulation runs in a controlled environment for educational analysis.*
+> *Note: This simulation runs in a controlled environment.*
 
 ![Password Attack Demo](media/security.gif)
 
@@ -48,7 +48,7 @@ A benchmarking tool that simulates real-world attack strategies:
 
 ### 1. Database Configuration
 
-Access your MySQL instance and set up the environment:
+Access MySQL instance and set up the environment:
 ```sql
 CREATE DATABASE security;
 CREATE USER 'luxury_user'@'localhost' IDENTIFIED BY 'luxury123';
@@ -77,7 +77,6 @@ The core of this project compares the computational cost of attacking **Unsalted
 | **Hashing Algorithm** | SHA-256 | Demonstrates collision resistance standard. |
 | **Salting** | `os.urandom(32)` | Prevents pre-computation attacks. |
 | **Database** | MySQL Connector | Simulates real-world backend latency. |
-| **UI** | Colorama | Provides real-time visual feedback on attack progress. |
 
 ### Code Structure
 ```
