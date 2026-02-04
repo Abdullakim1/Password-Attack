@@ -1,69 +1,50 @@
-# Password Security Analysis Tool
+# 🔐 Password Security Analysis Tool
 
-This project provides a comprehensive demonstration of password security concepts through two main components:
-1. A secure login system with salted password hashing
-2. A password analyzer demonstrating various password cracking techniques
+![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
+![MySQL](https://img.shields.io/badge/Database-MySQL-orange.svg)
+![Security](https://img.shields.io/badge/Focus-Cybersecurity-red.svg)
 
-## Components
+A comprehensive cybersecurity simulation tool designed to demonstrate the efficacy of various password cracking vectors against different hashing implementations. This project juxtaposes a secure, salted login system against a multi-vector password analysis engine.
 
-### 1. Login System (`login_system.py`)
-- Secure user registration and login
-- SHA-256 password hashing with salt
-- Account lockout after 3 failed attempts
-- MySQL database integration
-- Account reset functionality
+## ⚡ Demo
 
-### 2. Password Analyzer (`password_analyzer.py`)
-Demonstrates various password cracking techniques:
-- Dictionary Attack using real-world password lists
-- Brute Force Attack with character combinations
-- Hybrid Attack combining words with patterns
-- Mask Attack using password structure patterns
-- Rule-Based Attack with password transformations
-- Rainbow Table Attack with pre-computed hashes
+> *Note: This simulation runs in a controlled environment for educational analysis.*
 
-## Setup
+![Password Attack Demo](media/demo.gif)
+*(If the GIF doesn't load, please check the `media/` folder)*
 
-1. Configure MySQL database:
-```bash
-# Database configuration in both files:
-host: localhost
-user: luxury_user
-password: luxury123
-database: security
-```
-2. Command to see the database:
-```bash
-mysql -u luxury_user -p
-``` 
+## 📂 Project Architecture
 
-3. Run the login system:
-```bash
-python -m password_analyzer
-```
+This tool is split into two distinct modules representing **Defense** (Blue Team) and **Offense** (Red Team):
 
-## Security Features
+### 1. The Defense: Secure Login System (`login_system.py`)
+A production-grade authentication module implementing industry best practices:
+* **Cryptographic Hashing:** Uses SHA-256 with unique per-user salts to neutralize Rainbow Table attacks.
+* **Brute Force Mitigation:** Implements an exponential backoff and account lockout mechanism (3 failed attempts).
+* **Persistence:** Securely stores credentials in a MySQL database.
 
-- Salted password hashing to prevent rainbow table attacks
-- Account lockout mechanism to prevent brute force
-- Secure password storage in MySQL database
-- Real-time password cracking statistics
-- Automatic download of common password lists
+### 2. The Offense: Attack Vectors (`password_analyzer.py`)
+A benchmarking tool that simulates real-world attack strategies:
+* **Dictionary Attack:** Utilizes standard wordlists (e.g., `rockyou.txt` subsets).
+* **Brute Force:** Exhaustive key search for short/simple passwords.
+* **Hybrid Attack:** Combines dictionary words with common suffix patterns (e.g., "password123").
+* **Mask Attack:** Targets specific structural patterns (e.g., Upper-Lower-Digit-Digit).
+* **Rainbow Table Attack:** Demonstrates the speed of pre-computed hash lookup vs. dynamic hashing.
 
-## Educational Purpose
+---
 
-This tool is for educational purposes only to demonstrate:
-- How password hashing and salting work
-- Why strong passwords are important
-- The effectiveness of different password cracking techniques
-- Best practices for password security
-- Real-world attack vectors and defenses
+## 🛠️ Setup & Installation
 
-## Technical Implementation
+### Prerequisites
+* Python 3.8+
+* MySQL Server
+* `pip` package manager
 
-- Uses SHA-256 for password hashing
-- Implements both unsalted and salted hash comparisons
-- Colorama for enhanced CLI interface
-- Progress tracking for cracking attempts
-- Performance metrics and statistics
-- MySQL for secure credential storage
+### 1. Database Configuration
+Access your MySQL instance and set up the environment:
+
+```sql
+CREATE DATABASE security;
+CREATE USER 'luxury_user'@'localhost' IDENTIFIED BY 'luxury123';
+GRANT ALL PRIVILEGES ON security.* TO 'luxury_user'@'localhost';
+FLUSH PRIVILEGES;
