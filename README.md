@@ -1,4 +1,4 @@
-# 🔐 Password Security Analysis Tool
+# 🔐 Password Cracking Tool
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![MySQL](https://img.shields.io/badge/Database-MySQL-orange.svg)
@@ -56,25 +56,14 @@ GRANT ALL PRIVILEGES ON security.* TO 'luxury_user'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-### 2. Install Dependencies
-```bash
-pip install mysql-connector-python colorama
-```
 
-### 3. Usage
+### 2. Usage
 
-**Step 1: Initialize the System**
-
-First, run the login system to register a user. This populates the database with a salted hash.
-```bash
-python login_system.py
-```
-
-**Step 2: Run the Analyzer**
+**Step 1: Run the Analyzer**
 
 Launch the attack simulation to test the strength of the stored passwords.
 ```bash
-python password_analyzer.py
+python -m password_analyzer
 ```
 
 ---
@@ -92,8 +81,9 @@ The core of this project compares the computational cost of attacking **Unsalted
 
 ### Code Structure
 ```
-├── login_system.py       # Authentication & Registration logic
-├── password_analyzer.py  # Attack simulation engine
+├── password_analyzer    # Attack simulation engine
+    └──attacks
+    └──login
 ├── wordlists/           # Directory for dictionary files
 │   └── common_pass.txt
 ├── media/               # Demo assets
@@ -109,4 +99,4 @@ It is designed to help developers understand the importance of secure password s
 
 ---
 
-*Developed by [Abdullakim Zamirbek uulu](https://github.com/Abdullakim1)*
+*Developed by [Abdullakim](https://github.com/Abdullakim1)*
