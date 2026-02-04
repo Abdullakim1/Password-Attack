@@ -48,3 +48,24 @@ CREATE DATABASE security;
 CREATE USER 'luxury_user'@'localhost' IDENTIFIED BY 'luxury123';
 GRANT ALL PRIVILEGES ON security.* TO 'luxury_user'@'localhost';
 FLUSH PRIVILEGES;
+
+```
+---
+2. Install DependenciesBashpip install mysql-connector-python colorama
+3. UsageStep 1: Initialize the SystemFirst, run the login system to register a user. This populates the database with a salted hash.Bashpython login_system.py
+Step 2: Run the AnalyzerLaunch the attack simulation to test the strength of the stored passwords.Bashpython password_analyzer.py
+📊 Technical Implementation DetailsThe core of this project compares the computational cost of attacking Unsalted MD5/SHA vs Salted SHA-256.FeatureImplementationPurposeHashing AlgorithmSHA-256Demonstrates collision resistance standard.Saltingos.urandom(32)Prevents pre-computation attacks.DatabaseMySQL ConnectorSimulates real-world backend latency.UIColoramaProvides real-time visual feedback on attack progress.Code StructureBash├── login_system.py       # Authentication & Registration logic
+├── password_analyzer.py  # Attack simulation engine
+├── wordlists/           # Directory for dictionary files
+│   └── common_pass.txt
+├── media/               # Demo assets
+│   └── demo.gif
+└── README.md
+⚠️ Ethical DisclaimerThis tool is strictly for educational purposes and security analysis.It is designed to help developers understand the importance of secure password storage and the mechanics of common vulnerabilities. Do not use this tool against systems you do not own or have explicit permission to test.Developed by Abdullakim Zamirbek uulu
+### 💡 Quick Tip for the GIF
+Since you want to look like a "serious student," don't just record the whole screen.
+1.  Open your terminal.
+2.  Resize it so it looks neat.
+3.  Run the attack script.
+4.  Record **only the terminal window**.
+5.  If the attack takes too long, speed up the GIF to 1.5x or 2x speed so the viewer doesn't get bored waiting for the "Success" message.
