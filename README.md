@@ -10,7 +10,7 @@ A comprehensive cybersecurity simulation tool designed to demonstrate the effica
 
 > *Note: This simulation runs in a controlled environment for educational analysis.*
 
-![Password Attack Demo](media/demo.gif)
+![Password Attack Demo](media/security.gif)
 
 *(If the GIF doesn't load, please check the `media/` folder)*
 
