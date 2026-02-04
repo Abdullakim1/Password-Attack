@@ -1,4 +1,4 @@
-# 🔐 Password Security Analysis Tool
+# 🔐 Password Cracking Tool
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![MySQL](https://img.shields.io/badge/Database-MySQL-orange.svg)
